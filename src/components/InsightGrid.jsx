@@ -2,12 +2,13 @@ import { motion } from 'framer-motion'
 import { InsightCard } from './InsightCard'
 import { CATEGORIES } from '../lib/data'
 
-export function InsightGrid({ segmentState }) {
+export function InsightGrid({ segmentState, categories }) {
   const status = segmentState?.status || 'loading'
   const insights = segmentState?.insights || null
   const error = segmentState?.error || null
+  const displayCategories = categories || CATEGORIES
 
-  // Segment-level error (e.g. network failure before any cards)
+  // Segment-level error with no partial data
   if (status === 'error' && !insights) {
     return (
       <div className="rounded-xl border border-border bg-threats-bg p-6 text-center">
@@ -19,7 +20,7 @@ export function InsightGrid({ segmentState }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-      {CATEGORIES.map((category, index) => {
+      {displayCategories.map((category, index) => {
         const value = insights?.[category.id]
         return (
           <motion.div
