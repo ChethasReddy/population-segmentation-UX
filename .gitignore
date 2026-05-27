@@ -6,6 +6,7 @@ dist/
 dist-ssr/
 
 # env files (never commit real keys)
+.env
 .env.local
 .env.*.local
 
