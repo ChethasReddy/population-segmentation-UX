@@ -7,6 +7,7 @@ import { SegmentProfile } from './components/SegmentProfile'
 import { InsightGrid } from './components/InsightGrid'
 import { CategoryFilter, FILTERS } from './components/CategoryFilter'
 import { ConfidenceBadge } from './components/ConfidenceBadge'
+import { EmptyState } from './components/EmptyState'
 import { useInsights } from './hooks/useInsights'
 import { PRODUCTS, OBJECTIVES, SEGMENTS, CATEGORIES, DEFAULT_STATE } from './lib/data'
 
@@ -40,7 +41,11 @@ export default function App() {
     setActiveSegments((prev) => {
       if (prev.includes(segId)) {
         const next = prev.filter((id) => id !== segId)
-        if (selectedSegment === segId && next.length > 0) setSelectedSegment(next[0])
+        if (next.length === 0) {
+          setSelectedSegment(null)
+        } else if (selectedSegment === segId) {
+          setSelectedSegment(next[0])
+        }
         return next
       } else {
         const seg = SEGMENTS.find((s) => s.id === segId)
@@ -84,36 +89,40 @@ export default function App() {
           onSelect={setSelectedSegment}
         />
 
-        {/* Main scrollable content — AnimatePresence fades between segments */}
+        {/* Main scrollable content */}
         <main className="flex-1 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={selectedSegment}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="p-6 flex flex-col gap-5"
-            >
-              {/* Radar + opportunity bars */}
-              <SegmentProfile segmentId={selectedSegment} />
+          {activeSegments.length === 0 ? (
+            <EmptyState />
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedSegment}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="p-6 flex flex-col gap-5"
+              >
+                {/* Radar + opportunity bars */}
+                <SegmentProfile segmentId={selectedSegment} />
 
-              {/* Filter pills + confidence badge */}
-              <div className="flex items-center justify-between gap-4">
-                <CategoryFilter
-                  activeFilter={activeFilter}
-                  onFilterChange={setActiveFilter}
+                {/* Filter pills + confidence badge */}
+                <div className="flex items-center justify-between gap-4">
+                  <CategoryFilter
+                    activeFilter={activeFilter}
+                    onFilterChange={setActiveFilter}
+                  />
+                  <ConfidenceBadge confidence={confidence} />
+                </div>
+
+                {/* Card grid */}
+                <InsightGrid
+                  segmentState={currentSegmentState}
+                  categories={filteredCategories}
                 />
-                <ConfidenceBadge confidence={confidence} />
-              </div>
-
-              {/* Card grid */}
-              <InsightGrid
-                segmentState={currentSegmentState}
-                categories={filteredCategories}
-              />
-            </motion.div>
-          </AnimatePresence>
+              </motion.div>
+            </AnimatePresence>
+          )}
         </main>
       </div>
     </div>
