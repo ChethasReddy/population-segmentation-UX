@@ -1,9 +1,5 @@
 import { llmGenerate } from "./llm";
 import { SYSTEM_PROMPT, buildSegmentPrompt } from "./prompts";
-import {
-  isMockInsightsEnabled,
-  generateMockSegmentInsights,
-} from "./mockInsights";
 
 const REQUIRED_STRING_KEYS = [
   "strengths",
@@ -16,6 +12,25 @@ const REQUIRED_STRING_KEYS = [
   "investment",
   "channels",
 ];
+
+const RADAR_KEYS = [
+  "affinity",
+  "reach",
+  "loyalty",
+  "priceSensitivity",
+  "trendInfluence",
+  "conversionVelocity",
+];
+
+const SIGNAL_KEYS = [
+  "brandFit",
+  "reachPotential",
+  "conversionRisk",
+  "longTermValue",
+];
+
+const clampScore = (val) =>
+  Math.min(100, Math.max(0, Math.round(Number(val) || 0)));
 
 function parseLLMResponse(rawText) {
   let cleaned = rawText.trim();
@@ -52,19 +67,30 @@ function parseLLMResponse(rawText) {
   if (typeof parsed.confidence !== "number") {
     parsed.confidence = 0.75;
   }
+
+  if (!parsed.radar || typeof parsed.radar !== "object") {
+    throw new Error("LLM response missing radar or signals fields");
+  }
+  if (!parsed.signals || typeof parsed.signals !== "object") {
+    throw new Error("LLM response missing radar or signals fields");
+  }
+
+  parsed.radar = Object.fromEntries(
+    RADAR_KEYS.map((key) => [key, clampScore(parsed.radar[key])]),
+  );
+  parsed.signals = Object.fromEntries(
+    SIGNAL_KEYS.map((key) => [key, clampScore(parsed.signals[key])]),
+  );
+
   return parsed;
 }
 
 export async function generateSegmentInsights(ctx, providerId = "anthropic") {
-  if (isMockInsightsEnabled()) {
-    return generateMockSegmentInsights(ctx);
-  }
-
   const result = await llmGenerate(
     {
       system: SYSTEM_PROMPT,
       prompt: buildSegmentPrompt(ctx),
-      maxTokens: 1000,
+      maxTokens: 2000,
     },
     providerId,
   );

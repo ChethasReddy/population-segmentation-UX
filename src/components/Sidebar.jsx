@@ -182,7 +182,8 @@ export function Sidebar({
           </label>
           <div className="flex flex-col gap-1.5 pt-0.5">
             {SEGMENTS.map((seg) => {
-              const selected = selectedSegment === seg.id;
+              const selected =
+                activeView !== "compare" && selectedSegment === seg.id;
               const SegmentIcon = SEGMENT_ICONS[seg.id] || Sparkles;
               return (
                 <motion.button

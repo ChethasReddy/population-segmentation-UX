@@ -41,7 +41,9 @@ function SegmentIcon({ segmentId, segmentColor }) {
 export function CompareSegmentBar({
   activeSegments,
   comparisonSegments,
-  bySegment,
+  getSegmentState,
+  productId,
+  objectiveId,
   onAddSegment,
   onRemoveSegment,
   onClearAll,
@@ -72,11 +74,11 @@ export function CompareSegmentBar({
   }
 
   return (
-    <div className="px-8 pb-4">
+    <div className="relative z-30 px-8 pb-4">
       <div className="flex flex-wrap items-center gap-2">
         {comparisonSegments.map((segmentId) => {
           const segment = SEGMENTS.find((s) => s.id === segmentId);
-          const status = bySegment[segmentId]?.status;
+          const status = getSegmentState(productId, objectiveId, segmentId)?.status;
           return (
             <span
               key={segmentId}
@@ -128,7 +130,7 @@ export function CompareSegmentBar({
           {isAddOpen && canAdd && (
             <div
               role="listbox"
-              className="absolute left-0 top-full z-20 mt-1.5 min-w-[220px] overflow-hidden rounded-lg border border-border bg-surface-raised py-1 shadow-md"
+              className="absolute left-0 top-full z-30 mt-1.5 min-w-[220px] overflow-hidden rounded-lg border border-border bg-surface-raised py-1 shadow-md"
             >
               {availableToAdd.map((segment) => (
                 <button

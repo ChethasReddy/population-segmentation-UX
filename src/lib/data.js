@@ -122,7 +122,7 @@ export const VIEW_TABS = [
 
 export const DEFAULT_STATE = {
   product: "ev",
-  objective: "consideration",
+  objective: "awareness",
   activeSegments: [
     "gen-z-creators",
     "urban-climate",
@@ -130,41 +130,6 @@ export const DEFAULT_STATE = {
     "enterprise-it",
   ],
   selectedSegment: "gen-z-creators",
-};
-
-export const RADAR_DATA = {
-  "gen-z-creators": {
-    affinity: 92,
-    reach: 78,
-    loyalty: 45,
-    priceSens: 82,
-    trendInfl: 95,
-    convVel: 68,
-  },
-  "urban-climate": {
-    affinity: 85,
-    reach: 62,
-    loyalty: 78,
-    priceSens: 55,
-    trendInfl: 72,
-    convVel: 58,
-  },
-  "cost-sensitive-smb": {
-    affinity: 64,
-    reach: 70,
-    loyalty: 82,
-    priceSens: 95,
-    trendInfl: 35,
-    convVel: 75,
-  },
-  "enterprise-it": {
-    affinity: 58,
-    reach: 45,
-    loyalty: 92,
-    priceSens: 38,
-    trendInfl: 22,
-    convVel: 42,
-  },
 };
 
 export const COMPARE_ROWS = [

@@ -25,11 +25,32 @@ export default function App() {
   )
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  const { bySegment, isRunning, runForSegment, runForAllSegments } = useInsights()
+  const {
+    bySegment,
+    isRunning,
+    runForAllSegments,
+    syncDisplay,
+    getSegmentState,
+    resolveSegmentState,
+    hydrateSegment,
+  } = useInsights()
 
   const productObj = PRODUCTS.find((p) => p.id === product)
   const objectiveObj = OBJECTIVES.find((o) => o.id === objective)
-  const currentSegmentState = bySegment[selectedSegment]
+
+  const currentSegmentState = useMemo(
+    () =>
+      selectedSegment
+        ? resolveSegmentState(product, objective, selectedSegment)
+        : { status: 'idle', insights: null, error: null },
+    [resolveSegmentState, product, objective, selectedSegment, bySegment, isRunning],
+  )
+
+  const gridKey = selectedSegment
+    ? `${product}-${objective}-${selectedSegment}-${activeFilter}`
+    : 'empty'
+
+  const isGridReady = currentSegmentState?.status === 'ready'
 
   const orderedComparisonSegments = useMemo(
     () => SEGMENTS
@@ -38,19 +59,11 @@ export default function App() {
     [comparisonSegments],
   )
 
-  const ensureSegmentData = useCallback(
-    (segmentId) => {
-      const segment = SEGMENTS.find((s) => s.id === segmentId)
-      if (segment && bySegment[segmentId]?.status !== 'ready') {
-        runForSegment({
-          product: productObj,
-          objective: objectiveObj,
-          segment,
-        })
-      }
-    },
-    [bySegment, productObj, objectiveObj, runForSegment],
-  )
+  const ensureSegmentData = useCallback(() => {
+    // No API call. Compare cells show idle state
+    // until the user clicks Generate Insights.
+    // This is intentional.
+  }, [])
 
   const filteredCategories = (() => {
     const filter = FILTERS.find((f) => f.id === activeFilter)
@@ -59,9 +72,15 @@ export default function App() {
   })()
 
   useEffect(() => {
-    const segs = SEGMENTS.filter((s) => DEFAULT_STATE.activeSegments.includes(s.id))
-    runForAllSegments(productObj, objectiveObj, segs)
-  }, [])
+    syncDisplay(
+      product,
+      objective,
+      SEGMENTS.map((s) => s.id),
+    )
+    if (selectedSegment) {
+      hydrateSegment(product, objective, selectedSegment)
+    }
+  }, [product, objective, selectedSegment, syncDisplay, hydrateSegment])
 
   useEffect(() => {
     const media = window.matchMedia('(min-width: 1024px)')
@@ -88,12 +107,9 @@ export default function App() {
     setActiveView('insights')
     setSelectedSegment(segId)
     if (!activeSegments.includes(segId)) {
-      const seg = SEGMENTS.find((s) => s.id === segId)
-      if (seg && !bySegment[segId]?.insights) {
-        runForSegment({ product: productObj, objective: objectiveObj, segment: seg })
-      }
       setActiveSegments((prev) => [...prev, segId])
     }
+    hydrateSegment(product, objective, segId)
   }
 
   function handleRun() {
@@ -152,7 +168,9 @@ export default function App() {
           <CompareView
             comparisonSegments={orderedComparisonSegments}
             activeSegments={activeSegments}
-            bySegment={bySegment}
+            getSegmentState={getSegmentState}
+            productId={product}
+            objectiveId={objective}
             onComparisonSegmentsChange={handleComparisonSegmentsChange}
             onEnsureSegmentData={ensureSegmentData}
             previousSegmentId={selectedSegment}
@@ -166,16 +184,24 @@ export default function App() {
                   segmentId={selectedSegment}
                   segmentState={currentSegmentState}
                   activeSegments={activeSegments}
-                  bySegment={bySegment}
+                  productId={product}
+                  objectiveId={objective}
+                  resolveSegmentState={resolveSegmentState}
                 />
-                <div className="px-8 py-4 bg-transparent">
-                  <SegmentProfile segmentId={selectedSegment} />
-                </div>
                 <CategoryFilter
                   activeFilter={activeFilter}
                   onFilterChange={setActiveFilter}
-                  confidence={currentSegmentState?.insights?.confidence}
+                  confidence={currentSegmentState?.insights?.confidence ?? null}
                 />
+                <div className="px-8 pt-4 pb-2">
+                  <SegmentProfile
+                    segmentId={selectedSegment}
+                    segmentState={currentSegmentState}
+                    isRunning={isRunning}
+                    productId={product}
+                    objectiveId={objective}
+                  />
+                </div>
               </>
             ) : null}
 
@@ -183,14 +209,16 @@ export default function App() {
               {activeSegments.length === 0 || !selectedSegment ? (
                 <EmptyState />
               ) : (
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="wait" initial={false}>
                   <motion.div
-                    key={`${selectedSegment}-${activeFilter}`}
-                    initial={reduceMotion ? false : fadeUp.initial}
+                    key={gridKey}
+                    initial={
+                      reduceMotion || isGridReady ? false : fadeUp.initial
+                    }
                     animate={fadeUp.animate}
                     exit={reduceMotion ? undefined : fadeUp.exit}
                     transition={{ duration: duration.fast, ease }}
-                    className="px-8 py-6 flex flex-col gap-6"
+                    className="px-8 pb-6"
                   >
                     <InsightGrid
                       segmentState={currentSegmentState}

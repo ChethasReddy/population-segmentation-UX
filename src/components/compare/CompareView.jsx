@@ -8,7 +8,9 @@ import { CompareTable } from "./CompareTable";
 export function CompareView({
   comparisonSegments = [],
   activeSegments = [],
-  bySegment = {},
+  getSegmentState,
+  productId,
+  objectiveId,
   onComparisonSegmentsChange = () => {},
   onEnsureSegmentData = () => {},
   previousSegmentId,
@@ -38,24 +40,29 @@ export function CompareView({
     <CompareSegmentBar
       activeSegments={activeSegments}
       comparisonSegments={comparisonSegments}
-      bySegment={bySegment}
+      getSegmentState={getSegmentState}
+      productId={productId}
+      objectiveId={objectiveId}
       onAddSegment={handleAddSegment}
       onRemoveSegment={handleRemoveSegment}
       onClearAll={handleClearAll}
     />
   );
 
-  if (comparisonSegments.length === 0) {
-    return (
-      <div className="flex flex-col min-h-full">
-        <CompareHeader
-          comparisonSegments={[]}
-          bySegment={bySegment}
-          previousSegmentId={previousSegmentId}
-          onNavigateBack={onNavigateBack}
-        />
+  return (
+    <div className="flex flex-col min-h-full">
+      <CompareHeader
+        comparisonSegments={comparisonSegments}
+        getSegmentState={getSegmentState}
+        productId={productId}
+        objectiveId={objectiveId}
+        previousSegmentId={previousSegmentId}
+        onNavigateBack={onNavigateBack}
+      />
+      {segmentBar}
+      {comparisonSegments.length === 0 ? (
         <motion.div
-          className="flex flex-col items-center justify-center flex-1 gap-3 text-center px-8 py-12"
+          className="flex flex-col items-center justify-center gap-3 text-center px-8 py-12"
           initial={reduceMotion ? false : fadeUp.initial}
           animate={fadeUp.animate}
           transition={{ duration: duration.slow, ease }}
@@ -68,28 +75,18 @@ export function CompareView({
               No segments selected
             </h3>
             <p className="text-sm text-ink-500">
-              Pick a segment from the list below to start comparing.
+              Use Add Segment above to start comparing.
             </p>
           </div>
         </motion.div>
-        {segmentBar}
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col min-h-full">
-      <CompareHeader
-        comparisonSegments={comparisonSegments}
-        bySegment={bySegment}
-        previousSegmentId={previousSegmentId}
-        onNavigateBack={onNavigateBack}
-      />
-      {segmentBar}
-      <CompareTable
-        comparisonSegments={comparisonSegments}
-        bySegment={bySegment}
-      />
+      ) : (
+        <CompareTable
+          comparisonSegments={comparisonSegments}
+          getSegmentState={getSegmentState}
+          productId={productId}
+          objectiveId={objectiveId}
+        />
+      )}
     </div>
   );
 }

@@ -19,10 +19,18 @@ export function CompareContentCell({
   segmentId,
   segmentState,
 }) {
-  const status = segmentState?.status || "loading";
+  const status = segmentState?.status || "idle";
   const insights = segmentState?.insights;
   const value = insights?.[row.insightKey];
   const segment = SEGMENTS.find((s) => s.id === segmentId);
+
+  if (status === "idle") {
+    return (
+      <p className="text-ink-400 text-[12px] italic leading-relaxed">
+        Not generated. Select this segment and click Generate Insights.
+      </p>
+    );
+  }
 
   if (status === "loading") {
     return (

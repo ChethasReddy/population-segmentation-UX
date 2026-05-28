@@ -55,7 +55,7 @@ const CATEGORY_BODY_CELL = cn(
   "lg:sticky lg:left-0 lg:z-20 lg:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]",
 );
 
-export function CompareTable({ comparisonSegments, bySegment }) {
+export function CompareTable({ comparisonSegments, getSegmentState, productId, objectiveId }) {
   const segmentCount = comparisonSegments.length;
   const { category: categoryWidth, segment: segmentWidth } =
     getColumnWidths(segmentCount);
@@ -116,7 +116,7 @@ export function CompareTable({ comparisonSegments, bySegment }) {
                     <CompareContentCell
                       row={row}
                       segmentId={segmentId}
-                      segmentState={bySegment[segmentId]}
+                      segmentState={getSegmentState(productId, objectiveId, segmentId)}
                     />
                   </div>
                 </td>

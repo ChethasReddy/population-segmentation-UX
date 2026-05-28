@@ -4,16 +4,22 @@ import { SEGMENTS } from "../../lib/data";
 
 export function CompareHeader({
   comparisonSegments,
-  bySegment,
+  getSegmentState,
+  productId,
+  objectiveId,
   previousSegmentId,
   onNavigateBack,
 }) {
   const previousSegment = SEGMENTS.find((s) => s.id === previousSegmentId);
   const backLabel = previousSegment?.label ?? "Insights";
+
   function buildExportData() {
     const data = {};
     comparisonSegments.forEach((id) => {
-      if (bySegment[id]?.insights) data[id] = bySegment[id].insights;
+      const state = getSegmentState(productId, objectiveId, id);
+      if (state.status === "ready" && state.insights) {
+        data[id] = state.insights;
+      }
     });
     return data;
   }

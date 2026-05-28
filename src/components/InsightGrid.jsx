@@ -5,10 +5,19 @@ import { duration, ease } from "../lib/motion";
 
 export function InsightGrid({ segmentState, categories }) {
   const reduceMotion = useReducedMotion();
-  const status = segmentState?.status || "loading";
+  const status = segmentState?.status || "idle";
   const insights = segmentState?.insights || null;
   const error = segmentState?.error || null;
   const displayCategories = categories || CATEGORIES;
+
+  if (status === "idle") {
+    return (
+      <p className="text-ink-500 text-[13px] text-center py-12">
+        No insights yet. Click Generate Insights in the sidebar to analyse
+        this segment.
+      </p>
+    );
+  }
 
   if (status === "error" && !insights) {
     return (
@@ -28,11 +37,16 @@ export function InsightGrid({ segmentState, categories }) {
         return (
           <motion.div
             key={category.id}
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+            initial={
+              reduceMotion || status === "ready"
+                ? false
+                : { opacity: 0, y: 8 }
+            }
             animate={{ opacity: 1, y: 0 }}
             transition={{
               duration: duration.normal,
-              delay: status === "ready" && !reduceMotion ? index * 0.04 : 0,
+              delay:
+                status === "loading" && !reduceMotion ? index * 0.04 : 0,
               ease,
             }}
             layout

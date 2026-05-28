@@ -3,7 +3,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { PRODUCTS, OBJECTIVES, CATEGORIES } from "../lib/data";
-import { isMockInsightsEnabled } from "../lib/mockInsights";
 import { duration, ease, fadeDown, tap } from "../lib/motion";
 
 export function TopBar({
@@ -44,11 +43,6 @@ export function TopBar({
           {CATEGORIES.length} insights · {activeSegments.length} segment
           {activeSegments.length !== 1 ? "s" : ""}
         </Badge>
-        {isMockInsightsEnabled() && (
-          <Badge className="bg-weaknesses-bg border-transparent text-weaknesses-fg font-normal">
-            Mock data
-          </Badge>
-        )}
       </div>
       <div className="flex items-center gap-2">
         <motion.div whileTap={reduceMotion ? undefined : tap}>

@@ -16,7 +16,9 @@ export function SegmentHeader({
   segmentId,
   segmentState,
   activeSegments,
-  bySegment,
+  productId,
+  objectiveId,
+  resolveSegmentState,
 }) {
   const reduceMotion = useReducedMotion();
   const segment = SEGMENTS.find((s) => s.id === segmentId);
@@ -27,7 +29,10 @@ export function SegmentHeader({
   function handleExportJSON() {
     const data = {};
     activeSegments.forEach((id) => {
-      if (bySegment[id]?.insights) data[id] = bySegment[id].insights;
+      const state = resolveSegmentState(productId, objectiveId, id);
+      if (state.status === "ready" && state.insights) {
+        data[id] = state.insights;
+      }
     });
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
   }
