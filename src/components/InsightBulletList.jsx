@@ -1,6 +1,5 @@
 import { cn } from "../lib/utils";
 
-/** Remove leading numbers when using <ol> so items are not numbered twice. */
 function stripOrderedPrefix(text) {
   return text
     .replace(/^\d+[.)]\s+/, "")

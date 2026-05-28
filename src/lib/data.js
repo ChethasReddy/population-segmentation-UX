@@ -132,6 +132,13 @@ export const DEFAULT_STATE = {
   selectedSegment: "gen-z-creators",
 };
 
+export function isDefaultConfiguration(productId, objectiveId) {
+  return (
+    productId === DEFAULT_STATE.product &&
+    objectiveId === DEFAULT_STATE.objective
+  );
+}
+
 export const COMPARE_ROWS = [
   { id: "okrs", label: "Marketing OKRs", renderType: "orderedList", insightKey: "okrs" },
   { id: "strengths", label: "Strengths", renderType: "markdown", insightKey: "strengths" },
@@ -140,5 +147,7 @@ export const COMPARE_ROWS = [
   { id: "threats", label: "Threats", renderType: "markdown", insightKey: "threats" },
   { id: "positioning", label: "Market Positioning", renderType: "markdown", insightKey: "positioning" },
   { id: "persona", label: "Buyer Persona", renderType: "markdown", insightKey: "persona" },
+  { id: "investment", label: "Investment Case", renderType: "markdown", insightKey: "investment" },
+  { id: "channels", label: "Channels and Distribution", renderType: "markdown", insightKey: "channels" },
   { id: "confidence", label: "Confidence Score", renderType: "confidenceRing", insightKey: "confidence" },
 ];

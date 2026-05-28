@@ -44,7 +44,6 @@ function getColumnWidths(segmentCount) {
   };
 }
 
-/** Sticky only on large screens; on narrow viewports the whole table scrolls together. */
 const CATEGORY_HEADER_CELL = cn(
   "max-w-0 bg-[#f6f6f7] p-4 text-left align-top",
   "lg:sticky lg:left-0 lg:z-20 lg:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]",

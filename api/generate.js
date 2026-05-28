@@ -15,7 +15,7 @@ export default async function handler(req) {
     return jsonError(400, "Invalid JSON body");
   }
 
-  const { system, prompt, maxTokens = 1000 } = body;
+  const { system, prompt, maxTokens = 2000 } = body;
   if (!prompt) return jsonError(400, "Missing prompt");
 
   if (provider === "anthropic") {

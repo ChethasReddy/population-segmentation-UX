@@ -46,8 +46,6 @@ export function useInsights() {
       const cached = getSegmentState(productId, objectiveId, segmentId)
       const live = bySegment[segmentId]
 
-      // Prefer live state so loading/ready updates render immediately for the
-      // current product/objective (bySegment is keyed by segment id only).
       if (live?.status === 'loading' || live?.status === 'error') return live
       if (live?.status === 'ready') return live
       if (pendingRef.current.has(segmentId)) return LOADING
