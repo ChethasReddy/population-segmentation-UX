@@ -9,6 +9,8 @@ const COLOR_MAP = {
   okrs: { bg: "bg-okrs-bg", fg: "text-okrs-fg" },
   positioning: { bg: "bg-positioning-bg", fg: "text-positioning-fg" },
   persona: { bg: "bg-persona-bg", fg: "text-persona-fg" },
+  investment: { bg: "bg-investment-bg", fg: "text-investment-fg" },
+  channels: { bg: "bg-channels-bg", fg: "text-channels-fg" },
   confidence: { bg: "bg-surface-sunken", fg: "text-ink-500" },
 };
 
