@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { Menu } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { duration, ease, fadeUp } from './lib/motion'
 import { Sidebar } from './components/Sidebar'
@@ -22,6 +23,7 @@ export default function App() {
   const [comparisonSegments, setComparisonSegments] = useState(
     DEFAULT_STATE.activeSegments.slice(0, 2),
   )
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const { bySegment, isRunning, runForSegment, runForAllSegments } = useInsights()
 
@@ -61,6 +63,15 @@ export default function App() {
     runForAllSegments(productObj, objectiveObj, segs)
   }, [])
 
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1024px)')
+    function handleChange(event) {
+      if (event.matches) setIsSidebarOpen(false)
+    }
+    media.addEventListener('change', handleChange)
+    return () => media.removeEventListener('change', handleChange)
+  }, [])
+
   function handleComparisonSegmentsChange(segmentIds) {
     const ordered = SEGMENTS
       .filter((seg) => segmentIds.includes(seg.id))
@@ -91,13 +102,24 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-surface-base overflow-hidden">
+    <div className="relative flex h-screen bg-surface-base overflow-hidden">
+      {isSidebarOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-ink-900/20 lg:hidden"
+          aria-label="Close menu"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <Sidebar
         product={product}
         objective={objective}
         selectedSegment={selectedSegment}
         activeView={activeView}
         isRunning={isRunning}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
         onProductChange={setProduct}
         onObjectiveChange={setObjective}
         onSegmentSelect={handleSegmentSelect}
@@ -105,8 +127,23 @@ export default function App() {
         onRun={handleRun}
       />
 
+      <div className="flex flex-col flex-1 min-w-0 min-h-0">
+        <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-surface-raised shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            className="rounded-lg p-2 text-ink-600 hover:bg-surface-sunken"
+            aria-label="Open menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <span className="text-[15px] font-medium text-ink-900 truncate">
+            Subconscious.ai
+          </span>
+        </div>
+
       <motion.div
-        className="flex flex-col flex-1 min-w-0 overflow-y-auto bg-surface-sunken/60"
+        className="flex flex-col flex-1 min-w-0 min-h-0 overflow-y-auto bg-surface-sunken/60"
         initial={reduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: duration.normal, delay: 0.06, ease }}
@@ -162,6 +199,7 @@ export default function App() {
           </>
         )}
       </motion.div>
+      </div>
     </div>
   )
 }

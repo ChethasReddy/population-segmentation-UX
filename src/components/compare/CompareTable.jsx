@@ -1,13 +1,34 @@
+import { Briefcase, Leaf, PenTool, Shield, Sparkles } from "lucide-react";
 import { COMPARE_ROWS, SEGMENTS } from "../../lib/data";
+import { cn } from "../../lib/utils";
 import { CompareCategoryCell } from "./CompareCategoryCell";
 import { CompareContentCell } from "./CompareContentCell";
 
-const SEG_COLORS = {
-  seg1: "#7F77DD",
-  seg2: "#1D9E75",
-  seg3: "#BA7517",
-  seg4: "#D4537E",
+const SEGMENT_ICONS = {
+  "gen-z-creators": PenTool,
+  "urban-climate": Leaf,
+  "cost-sensitive-smb": Briefcase,
+  "enterprise-it": Shield,
 };
+
+const SEG_ICON_CLASS = {
+  seg1: "text-seg1",
+  seg2: "text-seg2",
+  seg3: "text-seg3",
+  seg4: "text-seg4",
+};
+
+function SegmentIcon({ segmentId, segmentColor }) {
+  const Icon = SEGMENT_ICONS[segmentId] || Sparkles;
+  return (
+    <Icon
+      className={cn(
+        "h-3.5 w-3.5 shrink-0",
+        SEG_ICON_CLASS[segmentColor] || "text-ink-400",
+      )}
+    />
+  );
+}
 
 function getSegmentLabel(id) {
   return SEGMENTS.find((seg) => seg.id === id)?.label || id;
@@ -23,14 +44,30 @@ function getColumnWidths(segmentCount) {
   };
 }
 
+/** Sticky only on large screens; on narrow viewports the whole table scrolls together. */
+const CATEGORY_HEADER_CELL = cn(
+  "max-w-0 bg-[#f6f6f7] p-4 text-left align-top",
+  "lg:sticky lg:left-0 lg:z-20 lg:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]",
+);
+
+const CATEGORY_BODY_CELL = cn(
+  "max-w-0 align-top p-4 bg-[#f6f6f7] border-t border-border/60",
+  "lg:sticky lg:left-0 lg:z-20 lg:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]",
+);
+
 export function CompareTable({ comparisonSegments, bySegment }) {
   const segmentCount = comparisonSegments.length;
   const { category: categoryWidth, segment: segmentWidth } =
     getColumnWidths(segmentCount);
 
+  const minTableWidth = 220 + segmentCount * 260;
+
   return (
     <div className="px-8 pb-8 overflow-x-auto">
-      <table className="w-full table-fixed border-separate border-spacing-0">
+      <table
+        className="w-full table-fixed border-separate border-spacing-0"
+        style={{ minWidth: minTableWidth }}
+      >
         <colgroup>
           <col style={{ width: categoryWidth }} />
           {comparisonSegments.map((segmentId) => (
@@ -39,8 +76,8 @@ export function CompareTable({ comparisonSegments, bySegment }) {
         </colgroup>
         <thead>
           <tr>
-            <th className="sticky left-0 z-10 bg-[#f6f6f7] p-4 text-left align-top shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-ink-500">
+            <th className={CATEGORY_HEADER_CELL}>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-ink-500 break-words">
                 Insight Category
               </p>
             </th>
@@ -49,15 +86,10 @@ export function CompareTable({ comparisonSegments, bySegment }) {
               return (
                 <th
                   key={segmentId}
-                  className="p-4 text-left align-top bg-surface-sunken/60"
+                  className="relative z-0 max-w-0 p-4 text-left align-top bg-surface-sunken/60"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full shrink-0"
-                      style={{
-                        backgroundColor: SEG_COLORS[segment?.color] || "#6B6B73",
-                      }}
-                    />
+                    <SegmentIcon segmentId={segmentId} segmentColor={segment?.color} />
                     <span className="text-[13px] font-medium text-ink-900 truncate">
                       {getSegmentLabel(segmentId)}
                     </span>
@@ -70,17 +102,17 @@ export function CompareTable({ comparisonSegments, bySegment }) {
         <tbody>
           {COMPARE_ROWS.map((row) => (
             <tr key={row.id}>
-              <td className="sticky left-0 z-10 align-top p-4 bg-[#f6f6f7] border-t border-border/60 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
-                <div className="rounded-xl border border-border bg-surface-raised p-4 h-full">
+              <td className={CATEGORY_BODY_CELL}>
+                <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-surface-raised p-4 h-full">
                   <CompareCategoryCell row={row} />
                 </div>
               </td>
               {comparisonSegments.map((segmentId) => (
                 <td
                   key={`${row.id}-${segmentId}`}
-                  className="align-top p-4 border-t border-border/60"
+                  className="relative z-0 max-w-0 align-top p-4 border-t border-border/60"
                 >
-                  <div className="rounded-xl border border-border bg-surface-raised p-4 h-full min-h-[80px]">
+                  <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-surface-raised p-4 h-full min-h-[80px]">
                     <CompareContentCell
                       row={row}
                       segmentId={segmentId}
