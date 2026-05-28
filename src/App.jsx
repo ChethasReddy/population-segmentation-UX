@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Menu } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { duration, ease, fadeUp } from './lib/motion'
@@ -10,7 +10,14 @@ import { CategoryFilter, FILTERS } from './components/CategoryFilter'
 import { EmptyState } from './components/EmptyState'
 import { CompareView } from './components/compare/CompareView'
 import { useInsights } from './hooks/useInsights'
-import { PRODUCTS, OBJECTIVES, SEGMENTS, CATEGORIES, DEFAULT_STATE } from './lib/data'
+import {
+  PRODUCTS,
+  OBJECTIVES,
+  SEGMENTS,
+  CATEGORIES,
+  DEFAULT_STATE,
+  isDefaultConfiguration,
+} from './lib/data'
 
 export default function App() {
   const reduceMotion = useReducedMotion()
@@ -24,6 +31,7 @@ export default function App() {
     DEFAULT_STATE.activeSegments.slice(0, 2),
   )
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const didInitialAutoRun = useRef(false)
 
   const {
     bySegment,
@@ -77,6 +85,31 @@ export default function App() {
       hydrateSegment(product, objective, selectedSegment)
     }
   }, [product, objective, selectedSegment, syncDisplay, hydrateSegment])
+
+  useEffect(() => {
+    if (didInitialAutoRun.current) return
+    if (
+      !isDefaultConfiguration(DEFAULT_STATE.product, DEFAULT_STATE.objective)
+    ) {
+      return
+    }
+
+    const productObj = PRODUCTS.find((p) => p.id === DEFAULT_STATE.product)
+    const objectiveObj = OBJECTIVES.find(
+      (o) => o.id === DEFAULT_STATE.objective,
+    )
+    if (!productObj || !objectiveObj) return
+
+    const segments = SEGMENTS.filter((s) =>
+      DEFAULT_STATE.activeSegments.includes(s.id),
+    )
+    if (segments.length === 0) return
+
+    didInitialAutoRun.current = true
+    runForAllSegments(productObj, objectiveObj, segments)
+    // Mount-only: do not add product/objective — auto-run once per page load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const media = window.matchMedia('(min-width: 1024px)')

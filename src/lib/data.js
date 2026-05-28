@@ -132,6 +132,13 @@ export const DEFAULT_STATE = {
   selectedSegment: "gen-z-creators",
 };
 
+export function isDefaultConfiguration(productId, objectiveId) {
+  return (
+    productId === DEFAULT_STATE.product &&
+    objectiveId === DEFAULT_STATE.objective
+  );
+}
+
 export const COMPARE_ROWS = [
   { id: "okrs", label: "Marketing OKRs", renderType: "orderedList", insightKey: "okrs" },
   { id: "strengths", label: "Strengths", renderType: "markdown", insightKey: "strengths" },
