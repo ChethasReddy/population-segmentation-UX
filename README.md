@@ -2,7 +2,7 @@
 
 A live population segmentation tool that generates AI-powered strategic insights across customer segments. Choose a product and business objective, then explore SWOT analysis, marketing OKRs, buyer personas, channel strategy, and an investment case for each segment—with profile charts and side-by-side comparison.
 
-**Live:** `https://your-production-url.vercel.app` — replace with your Vercel URL after `vercel --prod` and verify the app loads with working LLM calls.
+**Live:** `https://population-segmentation-ux.vercel.app`
 
 ---
 
