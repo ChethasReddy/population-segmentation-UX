@@ -12,22 +12,29 @@ export function ConfidenceBadge({ confidence, compact = false }) {
         ? { colorClass: "text-weaknesses-fg", bgClass: "bg-weaknesses-bg" }
         : { colorClass: "text-threats-fg", bgClass: "bg-threats-bg" };
 
+  const fullLabel = `${pct}% Confidence`;
+
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full shrink-0",
+        "inline-flex min-w-0 max-w-full shrink items-center rounded-full",
         bgClass,
         compact ? "px-2 py-0.5" : "px-2.5 py-1",
       )}
+      title={fullLabel}
     >
       <span
         className={cn(
-          "font-medium",
+          "min-w-0 truncate font-medium",
           colorClass,
           compact ? "text-[10px]" : "text-[11px]",
         )}
       >
-        {pct}% Confidence
+        {pct}%
+        <span className={compact ? "hidden md:inline" : "hidden sm:inline"}>
+          {" "}
+          Confidence
+        </span>
       </span>
     </div>
   );

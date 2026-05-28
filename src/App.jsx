@@ -59,11 +59,7 @@ export default function App() {
     [comparisonSegments],
   )
 
-  const ensureSegmentData = useCallback(() => {
-    // No API call. Compare cells show idle state
-    // until the user clicks Generate Insights.
-    // This is intentional.
-  }, [])
+  const ensureSegmentData = useCallback(() => {}, [])
 
   const filteredCategories = (() => {
     const filter = FILTERS.find((f) => f.id === activeFilter)

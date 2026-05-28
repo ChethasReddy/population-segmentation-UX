@@ -36,7 +36,6 @@ function splitLegacyString(text) {
   return [trimmed]
 }
 
-/** Normalize LLM or cached insight text into 2–4 bullet strings. */
 export function toBulletItems(value, { maxItems = DEFAULT_MAX_ITEMS } = {}) {
   let items = []
 
