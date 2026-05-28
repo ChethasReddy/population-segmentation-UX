@@ -8,7 +8,6 @@ export function InsightGrid({ segmentState, categories }) {
   const status = segmentState?.status || "loading";
   const insights = segmentState?.insights || null;
   const error = segmentState?.error || null;
-  const segmentConfidence = insights?.confidence;
   const displayCategories = categories || CATEGORIES;
 
   if (status === "error" && !insights) {
@@ -43,7 +42,6 @@ export function InsightGrid({ segmentState, categories }) {
               status={status}
               value={value}
               error={error}
-              segmentConfidence={segmentConfidence}
             />
           </motion.div>
         );

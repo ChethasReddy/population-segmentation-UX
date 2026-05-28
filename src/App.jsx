@@ -171,7 +171,11 @@ export default function App() {
                 <div className="px-8 py-4 bg-transparent">
                   <SegmentProfile segmentId={selectedSegment} />
                 </div>
-                <CategoryFilter activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+                <CategoryFilter
+                  activeFilter={activeFilter}
+                  onFilterChange={setActiveFilter}
+                  confidence={currentSegmentState?.insights?.confidence}
+                />
               </>
             ) : null}
 

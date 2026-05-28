@@ -3,16 +3,18 @@ import * as LucideIcons from "lucide-react";
 import { cn } from "../lib/utils";
 import { VIEW_TABS } from "../lib/data";
 import { duration, ease, spring, tap } from "../lib/motion";
+import { ConfidenceBadge } from "./ConfidenceBadge";
 
 export const FILTERS = VIEW_TABS;
 
-export function CategoryFilter({ activeFilter, onFilterChange }) {
+export function CategoryFilter({ activeFilter, onFilterChange, confidence }) {
   const reduceMotion = useReducedMotion();
 
   return (
     <div className="bg-transparent shrink-0">
       <div className="px-8">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-1 min-w-0">
           {VIEW_TABS.map((tab, index) => {
             const isActive = activeFilter === tab.id;
             const Icon = LucideIcons[tab.icon] || LucideIcons.LayoutGrid;
@@ -53,6 +55,15 @@ export function CategoryFilter({ activeFilter, onFilterChange }) {
               </motion.button>
             );
           })}
+          </div>
+          {confidence != null && (
+            <span
+              className="shrink-0"
+              title="Self-reported confidence from the model for this segment."
+            >
+              <ConfidenceBadge confidence={confidence} compact />
+            </span>
+          )}
         </div>
       </div>
     </div>

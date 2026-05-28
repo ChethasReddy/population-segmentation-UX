@@ -1,11 +1,9 @@
 import { motion, useReducedMotion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { Skeleton } from "./ui/skeleton";
-import { ConfidenceBadge } from "./ConfidenceBadge";
 import * as LucideIcons from "lucide-react";
 import { cn } from "../lib/utils";
 import { CATEGORY_PROMPTS } from "../lib/data";
-import { getCardConfidence } from "../lib/cardConfidence";
 import { duration, ease } from "../lib/motion";
 
 const COLOR_MAP = {
@@ -36,20 +34,13 @@ function toProse(value) {
   return "";
 }
 
-export function InsightCard({
-  category,
-  status,
-  value,
-  error,
-  segmentConfidence,
-}) {
+export function InsightCard({ category, status, value, error }) {
   const reduceMotion = useReducedMotion();
   const colors = COLOR_MAP[category.color] || {
     bg: "bg-surface-sunken",
     fg: "text-ink-700",
   };
   const Icon = LucideIcons[category.icon] || LucideIcons.Zap;
-  const cardConfidence = getCardConfidence(segmentConfidence, category.id);
 
   return (
     <motion.div
@@ -64,22 +55,17 @@ export function InsightCard({
       }
       transition={{ duration: duration.fast, ease }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <motion.div
-            className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${colors.bg}`}
-            animate={reduceMotion ? undefined : { scale: [1, 1.05, 1] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <Icon className={`w-4 h-4 ${colors.fg}`} />
-          </motion.div>
-          <span className="text-[14px] font-medium text-ink-900 leading-tight">
-            {category.label}
-          </span>
-        </div>
-        {status === "ready" && (
-          <ConfidenceBadge confidence={cardConfidence} compact />
-        )}
+      <div className="flex items-center gap-2.5 min-w-0">
+        <motion.div
+          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${colors.bg}`}
+          animate={reduceMotion ? undefined : { scale: [1, 1.05, 1] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Icon className={`w-4 h-4 ${colors.fg}`} />
+        </motion.div>
+        <span className="text-[14px] font-medium text-ink-900 leading-tight">
+          {category.label}
+        </span>
       </div>
 
       <p className="text-[12px] leading-relaxed text-ink-400">
