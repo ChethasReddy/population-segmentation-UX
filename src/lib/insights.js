@@ -1,16 +1,50 @@
 import { llmGenerate } from "./llm";
 import { SYSTEM_PROMPT, buildSegmentPrompt } from "./prompts";
+import { toBulletItems } from "./utils";
 
-const REQUIRED_STRING_KEYS = [
+export { toBulletItems } from "./utils";
+
+const BULLET_FIELD_KEYS = [
   "strengths",
   "weaknesses",
   "opportunities",
   "threats",
+  "okrs",
   "positioning",
   "persona",
   "investment",
   "channels",
 ];
+
+const RADAR_KEYS = [
+  "affinity",
+  "reach",
+  "loyalty",
+  "priceSensitivity",
+  "trendInfluence",
+  "conversionVelocity",
+];
+
+const SIGNAL_KEYS = [
+  "brandFit",
+  "reachPotential",
+  "conversionRisk",
+  "longTermValue",
+];
+
+const clampScore = (val) =>
+  Math.min(100, Math.max(0, Math.round(Number(val) || 0)));
+
+function normalizeBulletFields(parsed) {
+  for (const key of BULLET_FIELD_KEYS) {
+    const items = toBulletItems(parsed[key]);
+    if (items.length < 2) {
+      throw new Error(`LLM response missing or invalid field: ${key}`);
+    }
+    parsed[key] = items;
+  }
+  return parsed;
+}
 
 function parseLLMResponse(rawText) {
   let cleaned = rawText.trim();
@@ -32,24 +66,26 @@ function parseLLMResponse(rawText) {
     throw new Error(`Failed to parse LLM JSON response: ${err.message}`);
   }
 
-  for (const key of REQUIRED_STRING_KEYS) {
-    if (typeof parsed[key] !== "string" || parsed[key].length < 10) {
-      throw new Error(`LLM response missing or invalid field: ${key}`);
-    }
-  }
-
-  if (!Array.isArray(parsed.okrs) || parsed.okrs.length < 1) {
-    throw new Error(
-      "LLM response missing or invalid field: okrs (expected array)",
-    );
-  }
-  parsed.okrs = parsed.okrs.filter(
-    (s) => typeof s === "string" && s.length > 5,
-  );
+  normalizeBulletFields(parsed);
 
   if (typeof parsed.confidence !== "number") {
     parsed.confidence = 0.75;
   }
+
+  if (!parsed.radar || typeof parsed.radar !== "object") {
+    throw new Error("LLM response missing radar or signals fields");
+  }
+  if (!parsed.signals || typeof parsed.signals !== "object") {
+    throw new Error("LLM response missing radar or signals fields");
+  }
+
+  parsed.radar = Object.fromEntries(
+    RADAR_KEYS.map((key) => [key, clampScore(parsed.radar[key])]),
+  );
+  parsed.signals = Object.fromEntries(
+    SIGNAL_KEYS.map((key) => [key, clampScore(parsed.signals[key])]),
+  );
+
   return parsed;
 }
 
@@ -58,7 +94,7 @@ export async function generateSegmentInsights(ctx, providerId = "anthropic") {
     {
       system: SYSTEM_PROMPT,
       prompt: buildSegmentPrompt(ctx),
-      maxTokens: 1500,
+      maxTokens: 2000,
     },
     providerId,
   );

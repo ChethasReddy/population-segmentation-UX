@@ -1,66 +1,97 @@
-import ReactMarkdown from 'react-markdown'
-import { Skeleton } from './ui/skeleton'
-import * as LucideIcons from 'lucide-react'
+import { motion, useReducedMotion } from "framer-motion";
+import { Skeleton } from "./ui/skeleton";
+import * as LucideIcons from "lucide-react";
+import { cn, toBulletItems } from "../lib/utils";
+import { CATEGORY_PROMPTS } from "../lib/data";
+import { duration, ease } from "../lib/motion";
+import { InsightBulletList } from "./InsightBulletList";
 
-// Full class strings so Tailwind's scanner picks them up at build time
 const COLOR_MAP = {
-  strengths:     { bg: 'bg-strengths-bg',     fg: 'text-strengths-fg' },
-  weaknesses:    { bg: 'bg-weaknesses-bg',     fg: 'text-weaknesses-fg' },
-  opportunities: { bg: 'bg-opportunities-bg', fg: 'text-opportunities-fg' },
-  threats:       { bg: 'bg-threats-bg',       fg: 'text-threats-fg' },
-  okrs:          { bg: 'bg-okrs-bg',          fg: 'text-okrs-fg' },
-  positioning:   { bg: 'bg-positioning-bg',   fg: 'text-positioning-fg' },
-  persona:       { bg: 'bg-persona-bg',       fg: 'text-persona-fg' },
-  investment:    { bg: 'bg-investment-bg',    fg: 'text-investment-fg' },
-  channels:      { bg: 'bg-channels-bg',      fg: 'text-channels-fg' },
-}
+  strengths: { bg: "bg-strengths-bg", fg: "text-strengths-fg" },
+  weaknesses: { bg: "bg-weaknesses-bg", fg: "text-weaknesses-fg" },
+  opportunities: { bg: "bg-opportunities-bg", fg: "text-opportunities-fg" },
+  threats: { bg: "bg-threats-bg", fg: "text-threats-fg" },
+  okrs: { bg: "bg-okrs-bg", fg: "text-okrs-fg" },
+  positioning: { bg: "bg-positioning-bg", fg: "text-positioning-fg" },
+  persona: { bg: "bg-persona-bg", fg: "text-persona-fg" },
+  investment: { bg: "bg-investment-bg", fg: "text-investment-fg" },
+  channels: { bg: "bg-channels-bg", fg: "text-channels-fg" },
+};
+
+const BODY = "flex-1 min-h-[120px]";
 
 export function InsightCard({ category, status, value, error }) {
-  const colors = COLOR_MAP[category.color] || { bg: 'bg-surface-sunken', fg: 'text-ink-700' }
-  const Icon = LucideIcons[category.icon] || LucideIcons.Zap
+  const reduceMotion = useReducedMotion();
+  const colors = COLOR_MAP[category.color] || {
+    bg: "bg-surface-sunken",
+    fg: "text-ink-700",
+  };
+  const Icon = LucideIcons[category.icon] || LucideIcons.Zap;
+  const bullets = toBulletItems(value);
+  const isOkrs = category.id === "okrs";
 
   return (
-    <div className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3 h-full">
-      {/* Header */}
-      <div className="flex items-center gap-2.5">
-        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${colors.bg}`}>
-          <Icon className={`w-3.5 h-3.5 ${colors.fg}`} />
-        </div>
-        <span className={`text-[10px] uppercase tracking-wider font-medium ${colors.fg}`}>
+    <motion.div
+      className="rounded-xl border border-border bg-surface-raised p-5 flex flex-col gap-3 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+      whileHover={
+        reduceMotion
+          ? undefined
+          : {
+              y: -2,
+              boxShadow: "0 6px 20px rgba(15, 23, 42, 0.08)",
+            }
+      }
+      transition={{ duration: duration.fast, ease }}
+    >
+      <div className="flex items-center gap-2.5 min-w-0">
+        <motion.div
+          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${colors.bg}`}
+          animate={reduceMotion ? undefined : { scale: [1, 1.05, 1] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Icon className={`w-4 h-4 ${colors.fg}`} />
+        </motion.div>
+        <span className="text-[14px] font-medium text-ink-900 leading-tight">
           {category.label}
         </span>
       </div>
 
-      {/* Body */}
-      {status === 'loading' && (
-        <div className="flex flex-col gap-2 flex-1">
-          <Skeleton className="h-3 w-full" />
-          <Skeleton className="h-3 w-5/6" />
-          <Skeleton className="h-3 w-4/6" />
-          <Skeleton className="h-3 w-full mt-1" />
-          <Skeleton className="h-3 w-3/4" />
+      <p className="text-[12px] leading-relaxed text-ink-400">
+        {CATEGORY_PROMPTS[category.id]}
+      </p>
+
+      {status === "loading" && (
+        <div className={cn("flex flex-col gap-2", BODY)}>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-11/12" />
+          <Skeleton className="h-4 w-10/12" />
+          <Skeleton className="h-4 w-9/12" />
         </div>
       )}
 
-      {status === 'error' && (
-        <div className="rounded-lg bg-threats-bg px-3 py-2">
-          <p className="text-[12px] text-threats-fg">{error || 'Failed to load insight.'}</p>
-        </div>
+      {status === "error" && (
+        <motion.div
+          className={cn("rounded-lg bg-threats-bg px-3 py-2", BODY)}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: duration.normal, ease }}
+        >
+          <p className="text-[12px] text-threats-fg">
+            {error || "Failed to load insight."}
+          </p>
+        </motion.div>
       )}
 
-      {status === 'ready' && category.id === 'okrs' && Array.isArray(value) && (
-        <ol className="flex flex-col gap-2 pl-4 list-decimal flex-1">
-          {value.map((item, i) => (
-            <li key={i} className="text-[13px] leading-relaxed text-ink-700">{item}</li>
-          ))}
-        </ol>
+      {status === "ready" && (
+        <motion.div
+          className={BODY}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: duration.normal, ease }}
+        >
+          <InsightBulletList items={bullets} ordered={isOkrs} />
+        </motion.div>
       )}
-
-      {status === 'ready' && category.id !== 'okrs' && typeof value === 'string' && (
-        <div className="text-[13px] leading-relaxed text-ink-700 flex-1">
-          <ReactMarkdown>{value}</ReactMarkdown>
-        </div>
-      )}
-    </div>
-  )
+    </motion.div>
+  );
 }

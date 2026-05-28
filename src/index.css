@@ -3,15 +3,30 @@
 @tailwind utilities;
 
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #0A0A0B;
-  background-color: #FAFAFA;
+  color: #0a0a0b;
+  background-color: #fafafa;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
