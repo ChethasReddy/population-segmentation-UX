@@ -166,3 +166,14 @@ export const RADAR_DATA = {
     convVel: 42,
   },
 };
+
+export const COMPARE_ROWS = [
+  { id: "okrs", label: "Marketing OKRs", renderType: "orderedList", insightKey: "okrs" },
+  { id: "strengths", label: "Strengths", renderType: "markdown", insightKey: "strengths" },
+  { id: "weaknesses", label: "Weaknesses", renderType: "markdown", insightKey: "weaknesses" },
+  { id: "opportunities", label: "Opportunities", renderType: "markdown", insightKey: "opportunities" },
+  { id: "threats", label: "Threats", renderType: "markdown", insightKey: "threats" },
+  { id: "positioning", label: "Market Positioning", renderType: "markdown", insightKey: "positioning" },
+  { id: "persona", label: "Buyer Persona", renderType: "markdown", insightKey: "persona" },
+  { id: "confidence", label: "Confidence Score", renderType: "confidenceRing", insightKey: "confidence" },
+];

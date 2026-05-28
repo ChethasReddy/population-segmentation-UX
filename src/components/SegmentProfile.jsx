@@ -20,9 +20,9 @@ const RADAR_AXES = [
   { key: "affinity", label: "Affinity" },
   { key: "reach", label: "Reach" },
   { key: "loyalty", label: "Loyalty" },
-  { key: "priceSens", label: "Price Sens." },
-  { key: "trendInfl", label: "Trend Infl." },
-  { key: "convVel", label: "Conv. Vel." },
+  { key: "priceSens", label: "Price Sensitivity" },
+  { key: "trendInfl", label: "Trend Influence" },
+  { key: "convVel", label: "Conversion Velocity" },
 ];
 
 function hashCode(str) {
@@ -95,6 +95,7 @@ export function SegmentProfile({ segmentId }) {
               <PolarGrid stroke="rgba(0,0,0,0.07)" />
               <PolarAngleAxis
                 dataKey="axis"
+                interval={0}
                 tick={{ fontSize: 10, fill: "#6B6B73", fontFamily: "inherit" }}
               />
               <Radar

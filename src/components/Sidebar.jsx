@@ -62,10 +62,12 @@ export function Sidebar({
   product,
   objective,
   selectedSegment,
+  activeView,
   isRunning,
   onProductChange,
   onObjectiveChange,
   onSegmentSelect,
+  onNavigateCompare,
   onRun,
 }) {
   const reduceMotion = useReducedMotion();
@@ -212,7 +214,6 @@ export function Sidebar({
               </>
             )}
           </Button>
-          <p className="text-center text-[11px] text-ink-400">Powered by AI</p>
         </motion.div>
       </motion.div>
 
@@ -222,8 +223,22 @@ export function Sidebar({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: duration.normal, delay: 0.15, ease }}
       >
-        <button className="flex items-center gap-2.5 px-2 py-2 rounded-lg text-[13px] text-ink-600 hover:bg-surface-sunken transition-colors">
-          <GitCompare className="h-4 w-4 text-ink-400" />
+        <button
+          type="button"
+          onClick={onNavigateCompare}
+          className={cn(
+            "flex items-center gap-2.5 px-2 py-2 rounded-lg text-[13px] transition-colors",
+            activeView === "compare"
+              ? "bg-[#EEEDFE] text-ink-900 font-medium"
+              : "text-ink-600 hover:bg-surface-sunken",
+          )}
+        >
+          <GitCompare
+            className={cn(
+              "h-4 w-4",
+              activeView === "compare" ? "text-seg1" : "text-ink-400",
+            )}
+          />
           Comparison
         </button>
         <button className="flex items-center gap-2.5 px-2 py-2 rounded-lg text-[13px] text-ink-600 hover:bg-surface-sunken transition-colors">

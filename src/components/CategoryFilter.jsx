@@ -10,9 +10,9 @@ export function CategoryFilter({ activeFilter, onFilterChange }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="border-b border-border bg-surface-raised shrink-0">
-      <div className="px-8 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex items-center gap-1 min-w-max">
+    <div className="bg-transparent shrink-0">
+      <div className="px-8">
+        <div className="flex items-center gap-1">
           {VIEW_TABS.map((tab, index) => {
             const isActive = activeFilter === tab.id;
             const Icon = LucideIcons[tab.icon] || LucideIcons.LayoutGrid;

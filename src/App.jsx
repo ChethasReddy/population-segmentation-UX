@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { duration, ease, fadeUp } from './lib/motion'
 import { Sidebar } from './components/Sidebar'
@@ -7,6 +7,7 @@ import { SegmentProfile } from './components/SegmentProfile'
 import { InsightGrid } from './components/InsightGrid'
 import { CategoryFilter, FILTERS } from './components/CategoryFilter'
 import { EmptyState } from './components/EmptyState'
+import { CompareView } from './components/compare/CompareView'
 import { useInsights } from './hooks/useInsights'
 import { PRODUCTS, OBJECTIVES, SEGMENTS, CATEGORIES, DEFAULT_STATE } from './lib/data'
 
@@ -17,13 +18,37 @@ export default function App() {
   const [activeSegments, setActiveSegments] = useState(DEFAULT_STATE.activeSegments)
   const [selectedSegment, setSelectedSegment] = useState(DEFAULT_STATE.selectedSegment)
   const [activeFilter, setActiveFilter] = useState('overview')
-  const [isCompareEnabled, setIsCompareEnabled] = useState(false)
+  const [activeView, setActiveView] = useState('insights')
+  const [comparisonSegments, setComparisonSegments] = useState(
+    DEFAULT_STATE.activeSegments.slice(0, 2),
+  )
 
   const { bySegment, isRunning, runForSegment, runForAllSegments } = useInsights()
 
   const productObj = PRODUCTS.find((p) => p.id === product)
   const objectiveObj = OBJECTIVES.find((o) => o.id === objective)
   const currentSegmentState = bySegment[selectedSegment]
+
+  const orderedComparisonSegments = useMemo(
+    () => SEGMENTS
+      .filter((seg) => comparisonSegments.includes(seg.id))
+      .map((seg) => seg.id),
+    [comparisonSegments],
+  )
+
+  const ensureSegmentData = useCallback(
+    (segmentId) => {
+      const segment = SEGMENTS.find((s) => s.id === segmentId)
+      if (segment && bySegment[segmentId]?.status !== 'ready') {
+        runForSegment({
+          product: productObj,
+          objective: objectiveObj,
+          segment,
+        })
+      }
+    },
+    [bySegment, productObj, objectiveObj, runForSegment],
+  )
 
   const filteredCategories = (() => {
     const filter = FILTERS.find((f) => f.id === activeFilter)
@@ -36,7 +61,20 @@ export default function App() {
     runForAllSegments(productObj, objectiveObj, segs)
   }, [])
 
+  function handleComparisonSegmentsChange(segmentIds) {
+    const ordered = SEGMENTS
+      .filter((seg) => segmentIds.includes(seg.id))
+      .map((seg) => seg.id)
+    setComparisonSegments(ordered)
+  }
+
+  function handleNavigateCompare() {
+    orderedComparisonSegments.forEach(ensureSegmentData)
+    setActiveView('compare')
+  }
+
   function handleSegmentSelect(segId) {
+    setActiveView('insights')
     setSelectedSegment(segId)
     if (!activeSegments.includes(segId)) {
       const seg = SEGMENTS.find((s) => s.id === segId)
@@ -58,67 +96,71 @@ export default function App() {
         product={product}
         objective={objective}
         selectedSegment={selectedSegment}
+        activeView={activeView}
         isRunning={isRunning}
         onProductChange={setProduct}
         onObjectiveChange={setObjective}
         onSegmentSelect={handleSegmentSelect}
+        onNavigateCompare={handleNavigateCompare}
         onRun={handleRun}
       />
 
       <motion.div
-        className="flex flex-col flex-1 min-w-0"
+        className="flex flex-col flex-1 min-w-0 overflow-y-auto bg-surface-sunken/60"
         initial={reduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: duration.normal, delay: 0.06, ease }}
       >
-        {selectedSegment ? (
+        {activeView === 'compare' ? (
+          <CompareView
+            comparisonSegments={orderedComparisonSegments}
+            activeSegments={activeSegments}
+            bySegment={bySegment}
+            onComparisonSegmentsChange={handleComparisonSegmentsChange}
+            onEnsureSegmentData={ensureSegmentData}
+            previousSegmentId={selectedSegment}
+            onNavigateBack={() => setActiveView('insights')}
+          />
+        ) : (
           <>
-            <SegmentHeader
-              segmentId={selectedSegment}
-              segmentState={currentSegmentState}
-              activeSegments={activeSegments}
-              bySegment={bySegment}
-              isCompareEnabled={isCompareEnabled}
-              onToggleCompare={() => setIsCompareEnabled((prev) => !prev)}
-            />
-            <div className="px-8 py-4 border-b border-border bg-surface-raised">
-              <SegmentProfile segmentId={selectedSegment} />
-            </div>
-            <CategoryFilter activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-          </>
-        ) : null}
-
-        <main className="flex-1 overflow-y-auto bg-surface-base">
-          {activeSegments.length === 0 || !selectedSegment ? (
-            <EmptyState />
-          ) : (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${selectedSegment}-${activeFilter}`}
-                initial={reduceMotion ? false : fadeUp.initial}
-                animate={fadeUp.animate}
-                exit={reduceMotion ? undefined : fadeUp.exit}
-                transition={{ duration: duration.fast, ease }}
-                className="px-8 py-6 flex flex-col gap-6"
-              >
-                <InsightGrid
+            {selectedSegment ? (
+              <>
+                <SegmentHeader
+                  segmentId={selectedSegment}
                   segmentState={currentSegmentState}
-                  categories={filteredCategories}
+                  activeSegments={activeSegments}
+                  bySegment={bySegment}
                 />
+                <div className="px-8 py-4 bg-transparent">
+                  <SegmentProfile segmentId={selectedSegment} />
+                </div>
+                <CategoryFilter activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+              </>
+            ) : null}
 
-                {isCompareEnabled && (
-                  <div className="rounded-xl border border-border bg-surface-raised p-4 text-sm text-ink-500">
-                    Compare view is coming soon.
-                  </div>
-                )}
-
-                <p className="text-center text-[11px] text-ink-400 pt-2 pb-4">
-                  AI-generated insights. Review and validate before use.
-                </p>
-              </motion.div>
-            </AnimatePresence>
-          )}
-        </main>
+            <main className="bg-transparent">
+              {activeSegments.length === 0 || !selectedSegment ? (
+                <EmptyState />
+              ) : (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`${selectedSegment}-${activeFilter}`}
+                    initial={reduceMotion ? false : fadeUp.initial}
+                    animate={fadeUp.animate}
+                    exit={reduceMotion ? undefined : fadeUp.exit}
+                    transition={{ duration: duration.fast, ease }}
+                    className="px-8 py-6 flex flex-col gap-6"
+                  >
+                    <InsightGrid
+                      segmentState={currentSegmentState}
+                      categories={filteredCategories}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              )}
+            </main>
+          </>
+        )}
       </motion.div>
     </div>
   )

@@ -64,7 +64,7 @@ export async function generateSegmentInsights(ctx, providerId = "anthropic") {
     {
       system: SYSTEM_PROMPT,
       prompt: buildSegmentPrompt(ctx),
-      maxTokens: 1500,
+      maxTokens: 1000,
     },
     providerId,
   );

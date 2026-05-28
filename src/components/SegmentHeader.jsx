@@ -1,4 +1,4 @@
-import { GitCompare, Ellipsis, Download } from "lucide-react";
+import { Ellipsis, Download } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "./ui/button";
 import { SEGMENTS } from "../lib/data";
@@ -17,8 +17,6 @@ export function SegmentHeader({
   segmentState,
   activeSegments,
   bySegment,
-  isCompareEnabled,
-  onToggleCompare,
 }) {
   const reduceMotion = useReducedMotion();
   const segment = SEGMENTS.find((s) => s.id === segmentId);
@@ -36,7 +34,7 @@ export function SegmentHeader({
 
   return (
     <motion.div
-      className="px-8 pt-7 pb-5 border-b border-border bg-surface-raised shrink-0"
+      className="px-8 pt-7 pb-5 bg-transparent shrink-0"
       initial={reduceMotion ? false : fadeDown.initial}
       animate={fadeDown.animate}
       transition={{ duration: duration.normal, ease }}
@@ -55,16 +53,6 @@ export function SegmentHeader({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <motion.div whileTap={reduceMotion ? undefined : tap}>
-            <Button
-              variant={isCompareEnabled ? "brand" : "outline"}
-              size="sm"
-              onClick={onToggleCompare}
-            >
-              <GitCompare className="h-3.5 w-3.5" />
-              Compare
-            </Button>
-          </motion.div>
           <motion.div whileTap={reduceMotion ? undefined : tap}>
             <Button variant="outline" size="sm" onClick={handleExportJSON}>
               <Download className="h-3.5 w-3.5" />
