@@ -15,7 +15,7 @@ export default async function handler(req) {
     return jsonError(400, "Invalid JSON body");
   }
 
-  const { system, prompt, maxTokens = 1500 } = body;
+  const { system, prompt, maxTokens = 1000 } = body;
   if (!prompt) return jsonError(400, "Missing prompt");
 
   if (provider === "anthropic") {
@@ -37,6 +37,8 @@ async function callAnthropic({ system, prompt, maxTokens }) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return jsonError(500, "Missing ANTHROPIC_API_KEY");
 
+  const model = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+
   try {
     const upstream = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -46,7 +48,7 @@ async function callAnthropic({ system, prompt, maxTokens }) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model,
         max_tokens: maxTokens,
         system: system || "You are a helpful assistant.",
         messages: [{ role: "user", content: prompt }],
@@ -66,7 +68,7 @@ async function callAnthropic({ system, prompt, maxTokens }) {
     const text = data.content?.[0]?.text || "";
     return jsonOk({
       text,
-      model: data.model,
+      model: data.model ?? model,
       usage: {
         inputTokens: data.usage?.input_tokens,
         outputTokens: data.usage?.output_tokens,
@@ -87,6 +89,8 @@ async function callOpenAI({
   const key = process.env.OPENAI_API_KEY;
   if (!key) return jsonError(500, "Missing OPENAI_API_KEY");
 
+  const model = process.env.OPENAI_MODEL ?? "gpt-5.5";
+
   try {
     const upstream = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -95,7 +99,7 @@ async function callOpenAI({
         Authorization: `Bearer ${key}`,
       },
       body: JSON.stringify({
-        model: "gpt-5.5",
+        model,
         max_tokens: maxTokens,
         messages: [
           ...(system ? [{ role: "system", content: system }] : []),
@@ -117,7 +121,7 @@ async function callOpenAI({
     return jsonOk({
       text: choice?.message?.content || "",
       logprobs: choice?.logprobs || null,
-      model: data.model,
+      model: data.model ?? model,
       usage: {
         inputTokens: data.usage?.prompt_tokens,
         outputTokens: data.usage?.completion_tokens,

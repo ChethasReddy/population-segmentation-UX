@@ -1,9 +1,8 @@
 export const anthropicProvider = {
   id: "anthropic",
-  model: "claude-sonnet-4-6",
   supportsLogprobs: false,
 
-  async generate({ system, prompt, maxTokens = 1500 }) {
+  async generate({ system, prompt, maxTokens = 1000 }) {
     const start = Date.now();
     const res = await fetch("/api/generate?provider=anthropic", {
       method: "POST",
