@@ -2,12 +2,10 @@ import { useState, useEffect } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { duration, ease, fadeUp } from './lib/motion'
 import { Sidebar } from './components/Sidebar'
-import { TopBar } from './components/TopBar'
-import { SegmentTabs } from './components/SegmentTabs'
+import { SegmentHeader } from './components/SegmentHeader'
 import { SegmentProfile } from './components/SegmentProfile'
 import { InsightGrid } from './components/InsightGrid'
 import { CategoryFilter, FILTERS } from './components/CategoryFilter'
-import { ConfidenceBadge } from './components/ConfidenceBadge'
 import { EmptyState } from './components/EmptyState'
 import { useInsights } from './hooks/useInsights'
 import { PRODUCTS, OBJECTIVES, SEGMENTS, CATEGORIES, DEFAULT_STATE } from './lib/data'
@@ -18,14 +16,14 @@ export default function App() {
   const [objective, setObjective] = useState(DEFAULT_STATE.objective)
   const [activeSegments, setActiveSegments] = useState(DEFAULT_STATE.activeSegments)
   const [selectedSegment, setSelectedSegment] = useState(DEFAULT_STATE.selectedSegment)
-  const [activeFilter, setActiveFilter] = useState('all')
+  const [activeFilter, setActiveFilter] = useState('overview')
+  const [isCompareEnabled, setIsCompareEnabled] = useState(false)
 
   const { bySegment, isRunning, runForSegment, runForAllSegments } = useInsights()
 
   const productObj = PRODUCTS.find((p) => p.id === product)
   const objectiveObj = OBJECTIVES.find((o) => o.id === objective)
   const currentSegmentState = bySegment[selectedSegment]
-  const confidence = currentSegmentState?.insights?.confidence
 
   const filteredCategories = (() => {
     const filter = FILTERS.find((f) => f.id === activeFilter)
@@ -33,30 +31,20 @@ export default function App() {
     return CATEGORIES.filter((c) => filter.categories.includes(c.id))
   })()
 
-  // Fire all 4 segment calls on first load
   useEffect(() => {
     const segs = SEGMENTS.filter((s) => DEFAULT_STATE.activeSegments.includes(s.id))
     runForAllSegments(productObj, objectiveObj, segs)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
-  function handleSegmentToggle(segId) {
-    setActiveSegments((prev) => {
-      if (prev.includes(segId)) {
-        const next = prev.filter((id) => id !== segId)
-        if (next.length === 0) {
-          setSelectedSegment(null)
-        } else if (selectedSegment === segId) {
-          setSelectedSegment(next[0])
-        }
-        return next
-      } else {
-        const seg = SEGMENTS.find((s) => s.id === segId)
-        if (seg && !bySegment[segId]?.insights) {
-          runForSegment({ product: productObj, objective: objectiveObj, segment: seg })
-        }
-        return [...prev, segId]
+  function handleSegmentSelect(segId) {
+    setSelectedSegment(segId)
+    if (!activeSegments.includes(segId)) {
+      const seg = SEGMENTS.find((s) => s.id === segId)
+      if (seg && !bySegment[segId]?.insights) {
+        runForSegment({ product: productObj, objective: objectiveObj, segment: seg })
       }
-    })
+      setActiveSegments((prev) => [...prev, segId])
+    }
   }
 
   function handleRun() {
@@ -69,11 +57,11 @@ export default function App() {
       <Sidebar
         product={product}
         objective={objective}
-        activeSegments={activeSegments}
+        selectedSegment={selectedSegment}
         isRunning={isRunning}
         onProductChange={setProduct}
         onObjectiveChange={setObjective}
-        onSegmentToggle={handleSegmentToggle}
+        onSegmentSelect={handleSegmentSelect}
         onRun={handleRun}
       />
 
@@ -83,50 +71,50 @@ export default function App() {
         animate={{ opacity: 1 }}
         transition={{ duration: duration.normal, delay: 0.06, ease }}
       >
-        <TopBar
-          product={product}
-          objective={objective}
-          activeSegments={activeSegments}
-          bySegment={bySegment}
-        />
-        <SegmentTabs
-          activeSegments={activeSegments}
-          selectedSegment={selectedSegment}
-          bySegment={bySegment}
-          onSelect={setSelectedSegment}
-        />
+        {selectedSegment ? (
+          <>
+            <SegmentHeader
+              segmentId={selectedSegment}
+              segmentState={currentSegmentState}
+              activeSegments={activeSegments}
+              bySegment={bySegment}
+              isCompareEnabled={isCompareEnabled}
+              onToggleCompare={() => setIsCompareEnabled((prev) => !prev)}
+            />
+            <div className="px-8 py-4 border-b border-border bg-surface-raised">
+              <SegmentProfile segmentId={selectedSegment} />
+            </div>
+            <CategoryFilter activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+          </>
+        ) : null}
 
-        {/* Main scrollable content */}
-        <main className="flex-1 overflow-y-auto">
-          {activeSegments.length === 0 ? (
+        <main className="flex-1 overflow-y-auto bg-surface-base">
+          {activeSegments.length === 0 || !selectedSegment ? (
             <EmptyState />
           ) : (
             <AnimatePresence mode="wait">
               <motion.div
-                key={selectedSegment}
+                key={`${selectedSegment}-${activeFilter}`}
                 initial={reduceMotion ? false : fadeUp.initial}
                 animate={fadeUp.animate}
                 exit={reduceMotion ? undefined : fadeUp.exit}
                 transition={{ duration: duration.fast, ease }}
-                className="p-6 flex flex-col gap-5"
+                className="px-8 py-6 flex flex-col gap-6"
               >
-                {/* Radar + opportunity bars */}
-                <SegmentProfile segmentId={selectedSegment} />
-
-                {/* Filter pills + confidence badge */}
-                <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
-                  <CategoryFilter
-                    activeFilter={activeFilter}
-                    onFilterChange={setActiveFilter}
-                  />
-                  <ConfidenceBadge confidence={confidence} />
-                </div>
-
-                {/* Card grid */}
                 <InsightGrid
                   segmentState={currentSegmentState}
                   categories={filteredCategories}
                 />
+
+                {isCompareEnabled && (
+                  <div className="rounded-xl border border-border bg-surface-raised p-4 text-sm text-ink-500">
+                    Compare view is coming soon.
+                  </div>
+                )}
+
+                <p className="text-center text-[11px] text-ink-400 pt-2 pb-4">
+                  AI-generated insights. Review and validate before use.
+                </p>
               </motion.div>
             </AnimatePresence>
           )}

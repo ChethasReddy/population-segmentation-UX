@@ -1,11 +1,16 @@
 import { llmGenerate } from "./llm";
 import { SYSTEM_PROMPT, buildSegmentPrompt } from "./prompts";
+import {
+  isMockInsightsEnabled,
+  generateMockSegmentInsights,
+} from "./mockInsights";
 
 const REQUIRED_STRING_KEYS = [
   "strengths",
   "weaknesses",
   "opportunities",
   "threats",
+  "okrs",
   "positioning",
   "persona",
   "investment",
@@ -32,20 +37,17 @@ function parseLLMResponse(rawText) {
     throw new Error(`Failed to parse LLM JSON response: ${err.message}`);
   }
 
+  if (Array.isArray(parsed.okrs)) {
+    parsed.okrs = parsed.okrs
+      .filter((item) => typeof item === "string" && item.trim().length > 0)
+      .join(" ");
+  }
+
   for (const key of REQUIRED_STRING_KEYS) {
     if (typeof parsed[key] !== "string" || parsed[key].length < 10) {
       throw new Error(`LLM response missing or invalid field: ${key}`);
     }
   }
-
-  if (!Array.isArray(parsed.okrs) || parsed.okrs.length < 1) {
-    throw new Error(
-      "LLM response missing or invalid field: okrs (expected array)",
-    );
-  }
-  parsed.okrs = parsed.okrs.filter(
-    (s) => typeof s === "string" && s.length > 5,
-  );
 
   if (typeof parsed.confidence !== "number") {
     parsed.confidence = 0.75;
@@ -54,6 +56,10 @@ function parseLLMResponse(rawText) {
 }
 
 export async function generateSegmentInsights(ctx, providerId = "anthropic") {
+  if (isMockInsightsEnabled()) {
+    return generateMockSegmentInsights(ctx);
+  }
+
   const result = await llmGenerate(
     {
       system: SYSTEM_PROMPT,

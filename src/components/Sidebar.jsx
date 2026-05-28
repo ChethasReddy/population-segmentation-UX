@@ -1,4 +1,24 @@
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  Sparkles,
+  Car,
+  TrendingUp,
+  GitCompare,
+  Settings,
+  Coffee,
+  BarChart3,
+  Dumbbell,
+  Landmark,
+  Megaphone,
+  Search,
+  ShoppingCart,
+  RefreshCw,
+  PieChart,
+  PenTool,
+  Leaf,
+  Briefcase,
+  Shield,
+} from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "./ui/button";
 import {
@@ -12,31 +32,49 @@ import { PRODUCTS, OBJECTIVES, SEGMENTS } from "../lib/data";
 import { cn } from "../lib/utils";
 import { duration, ease, slideInLeft, stagger, tap } from "../lib/motion";
 
-const SEG_COLORS = {
-  seg1: "#7F77DD",
-  seg2: "#1D9E75",
-  seg3: "#BA7517",
-  seg4: "#D4537E",
+const SIDEBAR_SELECT =
+  "h-9 px-3 text-[13px] leading-tight [&>span]:flex-1 [&>span]:min-w-0 [&>span]:truncate [&>span]:text-left [&_svg]:ml-2";
+
+const PRODUCT_ICONS = {
+  ev: Car,
+  coffee: Coffee,
+  saas: BarChart3,
+  fitness: Dumbbell,
+  banking: Landmark,
 };
 
-const SIDEBAR_SELECT =
-  "h-8 px-2.5 text-[13px] leading-tight [&>span]:flex-1 [&>span]:min-w-0 [&>span]:truncate [&>span]:text-left [&_svg]:ml-1.5";
+const OBJECTIVE_ICONS = {
+  awareness: Megaphone,
+  consideration: Search,
+  conversion: ShoppingCart,
+  retention: RefreshCw,
+  expansion: PieChart,
+};
+
+const SEGMENT_ICONS = {
+  "gen-z-creators": PenTool,
+  "urban-climate": Leaf,
+  "cost-sensitive-smb": Briefcase,
+  "enterprise-it": Shield,
+};
 
 export function Sidebar({
   product,
   objective,
-  activeSegments,
+  selectedSegment,
   isRunning,
   onProductChange,
   onObjectiveChange,
-  onSegmentToggle,
+  onSegmentSelect,
   onRun,
 }) {
   const reduceMotion = useReducedMotion();
+  const ProductIcon = PRODUCT_ICONS[product] || Car;
+  const ObjectiveIcon = OBJECTIVE_ICONS[objective] || TrendingUp;
 
   return (
     <motion.aside
-      className="w-60 shrink-0 flex flex-col h-screen border-r border-border bg-surface-raised"
+      className="w-[272px] shrink-0 flex flex-col h-screen border-r border-border bg-surface-raised"
       initial={reduceMotion ? false : slideInLeft.initial}
       animate={slideInLeft.animate}
       transition={{ duration: duration.slow, ease }}
@@ -47,32 +85,32 @@ export function Sidebar({
         initial="initial"
         animate="animate"
       >
-        {/* Logo */}
         <motion.div
-          className="flex items-center gap-2 pt-1"
+          className="flex items-center gap-2.5 pt-1"
           variants={reduceMotion ? undefined : stagger.item}
         >
           <motion.div
-            className="w-2 h-2 rounded-full"
-            style={{ backgroundColor: "#7F77DD" }}
-            animate={reduceMotion ? undefined : { scale: [1, 1.15, 1] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <span className="text-[13px] font-medium text-ink-900">
+            className="w-8 h-8 rounded-lg bg-[#EEEDFE] flex items-center justify-center shrink-0"
+            animate={reduceMotion ? undefined : { scale: [1, 1.08, 1] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="w-4 h-4 rounded-full bg-seg1" />
+          </motion.div>
+          <span className="text-[15px] font-medium text-ink-900">
             Subconscious.ai
           </span>
         </motion.div>
 
-        {/* Product */}
         <motion.div
           className="flex flex-col gap-1.5"
           variants={reduceMotion ? undefined : stagger.item}
         >
-          <label className="text-[10px] uppercase tracking-wider text-ink-500">
+          <label className="text-[11px] font-medium text-ink-500">
             Product
           </label>
           <Select value={product} onValueChange={onProductChange}>
-            <SelectTrigger className={SIDEBAR_SELECT}>
+            <SelectTrigger className={cn(SIDEBAR_SELECT, "gap-2")}>
+              <ProductIcon className="h-3.5 w-3.5 text-ink-400 shrink-0" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -85,16 +123,16 @@ export function Sidebar({
           </Select>
         </motion.div>
 
-        {/* Objective */}
         <motion.div
           className="flex flex-col gap-1.5"
           variants={reduceMotion ? undefined : stagger.item}
         >
-          <label className="text-[10px] uppercase tracking-wider text-ink-500">
-            Objective
+          <label className="text-[11px] font-medium text-ink-500">
+            Business Objective
           </label>
           <Select value={objective} onValueChange={onObjectiveChange}>
-            <SelectTrigger className={SIDEBAR_SELECT}>
+            <SelectTrigger className={cn(SIDEBAR_SELECT, "gap-2")}>
+              <ObjectiveIcon className="h-3.5 w-3.5 text-ink-400 shrink-0" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -107,67 +145,103 @@ export function Sidebar({
           </Select>
         </motion.div>
 
-        {/* Segments */}
         <motion.div
           className="flex flex-col gap-2"
           variants={reduceMotion ? undefined : stagger.item}
         >
-          <label className="text-[10px] uppercase tracking-wider text-ink-500">
+          <label className="text-[11px] font-medium text-ink-500">
             Segments
           </label>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1.5 pt-0.5">
             {SEGMENTS.map((seg) => {
-              const active = activeSegments.includes(seg.id);
-              const color = SEG_COLORS[seg.color];
+              const selected = selectedSegment === seg.id;
+              const SegmentIcon = SEGMENT_ICONS[seg.id] || Sparkles;
               return (
                 <motion.button
                   key={seg.id}
-                  onClick={() => onSegmentToggle(seg.id)}
+                  onClick={() => onSegmentSelect(seg.id)}
                   whileTap={reduceMotion ? undefined : tap}
                   className={cn(
-                    "flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors",
-                    active
-                      ? "bg-surface-sunken text-ink-900"
-                      : "text-ink-500 hover:bg-surface-sunken hover:text-ink-700",
+                    "relative flex items-center px-3 py-2.5 rounded-lg text-left transition-colors mx-0.5 border border-border focus:outline-none focus:ring-2 focus:ring-ink-900/10",
+                    selected
+                      ? "bg-[#EEEDFE] text-ink-900"
+                      : "bg-surface-raised text-ink-600 hover:bg-surface-sunken",
                   )}
                 >
                   <motion.span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: active ? color : "#A8A8B0" }}
                     animate={
-                      reduceMotion
-                        ? undefined
-                        : { scale: active ? 1.15 : 1 }
+                      reduceMotion ? undefined : { scale: selected ? 1.1 : 1 }
                     }
                     transition={{ duration: duration.fast, ease }}
-                  />
-                  <span className="text-[13px] leading-tight">{seg.label}</span>
+                    className={cn(
+                      "h-3.5 w-3.5 shrink-0 ml-1",
+                      selected ? "text-seg1" : "text-ink-400",
+                    )}
+                  >
+                    <SegmentIcon className="h-3.5 w-3.5" />
+                  </motion.span>
+                  <span className="text-[13px] leading-tight pl-2">
+                    {seg.label}
+                  </span>
                 </motion.button>
               );
             })}
           </div>
         </motion.div>
-      </motion.div>
 
-      {/* Run button */}
-      <motion.div
-        className="p-5 border-t border-border"
-        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: duration.normal, delay: 0.2, ease }}
-      >
-        <motion.div whileTap={reduceMotion ? undefined : tap}>
-          <Button className="w-full" onClick={onRun} disabled={isRunning}>
+        <motion.div
+          className="flex flex-col gap-1.5 pt-1"
+          variants={reduceMotion ? undefined : stagger.item}
+        >
+          <Button
+            variant="brand"
+            size="lg"
+            className="w-full"
+            onClick={onRun}
+            disabled={isRunning}
+          >
             {isRunning ? (
               <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Running…
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating…
               </>
             ) : (
-              "Run analysis"
+              <>
+                <Sparkles className="h-4 w-4" />
+                Generate Insights
+              </>
             )}
           </Button>
+          <p className="text-center text-[11px] text-ink-400">Powered by AI</p>
         </motion.div>
+      </motion.div>
+
+      <motion.div
+        className="px-5 py-4 border-t border-border flex flex-col gap-1"
+        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: duration.normal, delay: 0.15, ease }}
+      >
+        <button className="flex items-center gap-2.5 px-2 py-2 rounded-lg text-[13px] text-ink-600 hover:bg-surface-sunken transition-colors">
+          <GitCompare className="h-4 w-4 text-ink-400" />
+          Comparison
+        </button>
+        <button className="flex items-center gap-2.5 px-2 py-2 rounded-lg text-[13px] text-ink-600 hover:bg-surface-sunken transition-colors">
+          <Settings className="h-4 w-4 text-ink-400" />
+          Settings
+        </button>
+
+        <div className="mt-3 flex items-center gap-2.5 rounded-xl border border-border bg-surface-base p-2.5">
+          <div className="w-8 h-8 rounded-full bg-[#EEEDFE] flex items-center justify-center text-[11px] font-medium text-seg1 shrink-0">
+            AJ
+          </div>
+          <div className="min-w-0">
+            <p className="text-[13px] font-medium text-ink-900 truncate">
+              Alex Johnson
+            </p>
+            <p className="text-[11px] text-ink-500 truncate">Strategy Team</p>
+          </div>
+        </div>
       </motion.div>
     </motion.aside>
   );
