@@ -23,7 +23,7 @@ export function TopBar({ product, objective, activeSegments, bySegment }) {
           <span className="text-ink-300 mx-1.5">·</span>
           <span className="font-medium text-ink-900">{objectiveLabel}</span>
         </span>
-        <Badge>
+        <Badge className="bg-surface-sunken border-transparent text-ink-300 font-normal">
           {CATEGORIES.length} insights · {activeSegments.length} segment{activeSegments.length !== 1 ? 's' : ''}
         </Badge>
       </div>

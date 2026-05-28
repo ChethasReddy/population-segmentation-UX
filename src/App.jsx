@@ -107,7 +107,7 @@ export default function App() {
                 <SegmentProfile segmentId={selectedSegment} />
 
                 {/* Filter pills + confidence badge */}
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 border-t border-border pt-4">
                   <CategoryFilter
                     activeFilter={activeFilter}
                     onFilterChange={setActiveFilter}

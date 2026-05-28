@@ -19,7 +19,7 @@ export function CategoryFilter({ activeFilter, onFilterChange }) {
           className={cn(
             'px-3 py-1 rounded-full text-[12px] transition-colors border whitespace-nowrap',
             activeFilter === f.id
-              ? 'bg-ink-900 text-white border-ink-900'
+              ? 'bg-surface-sunken text-ink-900 border-border font-medium'
               : 'bg-surface-raised text-ink-500 border-border hover:border-ink-300 hover:text-ink-700'
           )}
         >

@@ -184,6 +184,7 @@ colors: {
     900: '#0A0A0B',
     700: '#2A2A2E',
     500: '#6B6B73',
+    400: '#919199',
     300: '#A8A8B0',
     100: '#E8E8EB',
   },
@@ -232,7 +233,11 @@ Two font weights only: 400 (regular) and 500 (medium). Never 700.
 ### 8.3 Spacing
 
 - Card padding: `p-4` (16px)
+- Card internal gap (header to body): `gap-3` (12px)
 - Card gap in grid: `gap-3` (12px)
+- Profile card title to content: `gap-3` (12px), matching insight card header-to-body rhythm
+- Main content section gap: `gap-5` (20px) between profile, filter row, and grid
+- Filter row: `border-t border-border pt-4` to separate insights controls from profile visualization
 - Sidebar padding: `p-5` (20px)
 - Sidebar section gap: `gap-5` (20px)
 - Border radius: cards use `rounded-xl` (12px), buttons/selects use `rounded-lg` (8px)
@@ -241,12 +246,14 @@ Two font weights only: 400 (regular) and 500 (medium). Never 700.
 
 All borders use `border` with `border-border` (the rgba token). No thick borders, no decorative outlines.
 
-### 8.5 Motion
+### 8.5 Motion and interaction
 
 Use framer-motion only for:
 - Card entrance: stagger fade-in-up, 0.04s delay between cards, 0.25s duration
 - Segment tab switch: 0.2s fade
 - Loading skeleton: Tailwind's `animate-pulse`
+
+Insight cards use `transition-shadow hover:shadow-sm` on hover (no translate or scale).
 
 No bouncy springs, no rotations, no decorative motion.
 
@@ -757,6 +764,11 @@ export function useInsights() {
 
 Top-level layout. Holds selected product, selected objective, active segments, currently-viewed segment. Renders Sidebar on the left, main column on the right (TopBar, SegmentTabs, content area).
 
+Main scrollable content (`p-6 flex flex-col gap-5`):
+1. `SegmentProfile` (radar + opportunity bars)
+2. Filter row with `border-t border-border pt-4`: `CategoryFilter` + `ConfidenceBadge`
+3. `InsightGrid`
+
 On first mount, automatically trigger `runForAllSegments` so the app loads with real data already visible. Do not leave the user looking at a blank page on first load.
 
 ### 15.2 Sidebar.jsx
@@ -771,22 +783,25 @@ Fixed 240px wide, full-height, white background, right border. Contains:
 ### 15.3 TopBar.jsx
 
 Horizontal bar above main content. Contains:
-- Left: breadcrumb "Product · Objective" with objective in medium weight
-- Left: badge showing "9 insights · N segments"
+- Left: breadcrumb "Product · Objective" with objective in medium weight (`text-ink-500` product, `font-medium text-ink-900` objective)
+- Left: metadata badge showing "9 insights · N segments" — softened so breadcrumb leads: `bg-surface-sunken border-transparent text-ink-300 font-normal`
 - Right: Compare button (toggles compare view), Export JSON button (copies all current insights as JSON to clipboard), Copy button (copies current segment's insights as markdown)
 
 ### 15.4 SegmentTabs.jsx
 
-Horizontal tab strip showing active segments. Each tab has:
+Horizontal tab strip showing active segments. Container has `border-b border-border`. Each tab has:
 - A colored dot matching the segment's color
 - The segment label
-- Underline plus medium weight when active
+- `border-b-2 -mb-px` so the active tab underline replaces the container border (no double-thick line)
+- Underline plus medium weight when active (`border-ink-900`)
 
 Clicking a tab sets the currently-viewed segment. Use framer-motion to fade content when switching.
 
 ### 15.5 SegmentProfile.jsx
 
 Two-column row at the top of the content area. Left card: Radar chart (recharts) showing 6 dimensions for the current segment using `RADAR_DATA`. Right card: 4 horizontal progress bars (Brand Fit, Reach Potential, Conversion Risk, Long-term Value) derived deterministically from segment ID.
+
+Both profile cards use `flex flex-col gap-3` between the section title (`text-[10px] uppercase tracking-wider text-ink-500`) and content — matching insight card header-to-body spacing. Bar percentage values use `text-ink-400`.
 
 Radar axes: Affinity, Reach, Loyalty, Price Sensitivity, Trend Influence, Conversion Velocity. Fill = segment color at 0.3 opacity. Stroke = segment color at full opacity. No legend.
 
@@ -801,11 +816,19 @@ The `value` shape differs by category:
 - For all other categories: a single string. Render with react-markdown.
 
 Layout:
+- Root: `rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3 h-full transition-shadow hover:shadow-sm`
 - Top row: small icon in a colored square (using category's bg+fg tokens) + category label in the same fg color
-- Body: the OKR list, the markdown body, skeleton lines if loading, or red error block if error
-- Subtle border, white bg, rounded-xl, p-4
+- Body: shared `flex-1 min-h-[105px]` on all states (loading, ready, error) to prevent layout shift
 
-Use framer-motion to fade-in-up when transitioning from loading to ready (delay 0, duration 0.25).
+Markdown and list prose utilities (reset default margins):
+
+```
+[&_p]:m-0 [&_p+p]:mt-2.5 [&_ul]:mt-2 [&_ul]:mb-0 [&_ul]:pl-4 [&_ol]:mt-2 [&_ol]:mb-0 [&_ol]:pl-4 [&_li]:mt-1 [&_li:first-child]:mt-0
+```
+
+Apply to both the react-markdown wrapper and the OKR `<ol>`.
+
+Use framer-motion to fade-in-up when transitioning from loading to ready (delay 0, duration 0.25). Stagger is applied in InsightGrid, not InsightCard.
 
 ### 15.7 InsightGrid.jsx
 
@@ -816,6 +839,8 @@ Note: because all 9 categories arrive together (per-segment call), the stagger c
 ### 15.8 CategoryFilter.jsx
 
 Pill row above the grid. Pills: All, SWOT, OKRs, Persona, Channels, Investment. Clicking filters which cards show.
+
+Active pill (soft, does not compete with Run button or colored card headers): `bg-surface-sunken text-ink-900 border-border font-medium`. Inactive: `bg-surface-raised text-ink-500 border-border` with hover states.
 
 SWOT filter shows: strengths, weaknesses, opportunities, threats only.
 
@@ -869,9 +894,17 @@ Fire `runForAllSegments` for all currently-active segments. All segment calls fi
 
 ## 17. Loading States
 
-Per-segment loading: when a segment is in `loading` state, render 9 skeleton cards in the grid. Each skeleton has the same dimensions as a real card, with 3-4 shimmer bars in the body using Tailwind's `animate-pulse` and `bg-surface-sunken`. The icon area shows a faded version of the category icon.
+Per-segment loading: when a segment is in `loading` state, render 9 skeleton cards in the grid. Each skeleton card matches the real card structure (colored icon header + body area).
 
-When a segment transitions from loading to ready, the 9 cards animate in together with the stagger described in 15.7.
+Body skeleton spec (inside InsightCard):
+- Container: `flex-1 min-h-[105px]` (same min-height as loaded body)
+- 5 shimmer bars at `h-5` with `gap-2.5` (approximates `text-[13px] leading-relaxed` line height)
+- Widths: `w-full`, `w-5/6`, `w-4/6`, `w-full`, `w-3/4`
+- Bars use Tailwind's `animate-pulse` and `bg-surface-sunken` via the Skeleton component
+
+The icon header row renders at full opacity during loading (category icon in colored square), not faded.
+
+When a segment transitions from loading to ready, the 9 cards animate in together with the stagger described in 15.7. Minimal height shift between skeleton and loaded states is required.
 
 ---
 

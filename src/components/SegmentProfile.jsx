@@ -52,8 +52,8 @@ export function SegmentProfile({ segmentId }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {/* Radar chart */}
-      <div className="rounded-xl border border-border bg-surface-raised p-4">
-        <p className="text-[10px] uppercase tracking-wider text-ink-500 mb-3">Segment Profile</p>
+      <div className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3">
+        <p className="text-[10px] uppercase tracking-wider text-ink-500">Segment Profile</p>
         <ResponsiveContainer width="100%" height={180}>
           <RadarChart data={radarData} margin={{ top: 4, right: 20, bottom: 4, left: 20 }}>
             <PolarGrid stroke="rgba(0,0,0,0.07)" />
@@ -74,7 +74,7 @@ export function SegmentProfile({ segmentId }) {
       </div>
 
       {/* Opportunity bars */}
-      <div className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-4">
+      <div className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3">
         <p className="text-[10px] uppercase tracking-wider text-ink-500">Opportunity Signals</p>
         <div className="flex flex-col gap-4 flex-1 justify-center">
           {bars.map((bar) => {

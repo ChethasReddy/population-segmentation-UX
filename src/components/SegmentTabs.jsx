@@ -22,7 +22,7 @@ export function SegmentTabs({ activeSegments, selectedSegment, bySegment, onSele
             key={seg.id}
             onClick={() => onSelect(seg.id)}
             className={[
-              'flex items-center gap-2 px-4 py-3 text-[13px] border-b-2 transition-colors whitespace-nowrap',
+              'flex items-center gap-2 px-4 py-3 text-[13px] border-b-2 -mb-px transition-colors whitespace-nowrap',
               isActive
                 ? 'border-ink-900 text-ink-900 font-medium'
                 : 'border-transparent text-ink-500 hover:text-ink-700',
