@@ -1,10 +1,10 @@
 import { motion, useReducedMotion } from "framer-motion";
-import ReactMarkdown from "react-markdown";
 import { Skeleton } from "./ui/skeleton";
 import * as LucideIcons from "lucide-react";
-import { cn } from "../lib/utils";
+import { cn, toBulletItems } from "../lib/utils";
 import { CATEGORY_PROMPTS } from "../lib/data";
 import { duration, ease } from "../lib/motion";
+import { InsightBulletList } from "./InsightBulletList";
 
 const COLOR_MAP = {
   strengths: { bg: "bg-strengths-bg", fg: "text-strengths-fg" },
@@ -18,21 +18,7 @@ const COLOR_MAP = {
   channels: { bg: "bg-channels-bg", fg: "text-channels-fg" },
 };
 
-const PROSE =
-  "[&_p]:m-0 [&_p+p]:mt-2.5 [&_ul]:m-0 [&_ul]:list-none [&_ul]:pl-0 [&_ol]:m-0 [&_ol]:list-none [&_ol]:pl-0 [&_li]:m-0";
-
 const BODY = "flex-1 min-h-[120px]";
-
-function toProse(value) {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) {
-    const lines = value.filter(
-      (item) => typeof item === "string" && item.trim().length > 0,
-    );
-    return lines.join(" ");
-  }
-  return "";
-}
 
 export function InsightCard({ category, status, value, error }) {
   const reduceMotion = useReducedMotion();
@@ -41,6 +27,8 @@ export function InsightCard({ category, status, value, error }) {
     fg: "text-ink-700",
   };
   const Icon = LucideIcons[category.icon] || LucideIcons.Zap;
+  const bullets = toBulletItems(value);
+  const isOkrs = category.id === "okrs";
 
   return (
     <motion.div
@@ -73,12 +61,11 @@ export function InsightCard({ category, status, value, error }) {
       </p>
 
       {status === "loading" && (
-        <div className={cn("flex flex-col gap-2.5", BODY)}>
-          <Skeleton className="h-5 w-full" />
-          <Skeleton className="h-5 w-5/6" />
-          <Skeleton className="h-5 w-4/6" />
-          <Skeleton className="h-5 w-full" />
-          <Skeleton className="h-5 w-3/4" />
+        <div className={cn("flex flex-col gap-2", BODY)}>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-11/12" />
+          <Skeleton className="h-4 w-10/12" />
+          <Skeleton className="h-4 w-9/12" />
         </div>
       )}
 
@@ -97,16 +84,12 @@ export function InsightCard({ category, status, value, error }) {
 
       {status === "ready" && (
         <motion.div
-          className={cn(
-            "text-[13px] leading-relaxed text-ink-700",
-            PROSE,
-            BODY,
-          )}
+          className={BODY}
           initial={reduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: duration.normal, ease }}
         >
-          <ReactMarkdown>{toProse(value)}</ReactMarkdown>
+          <InsightBulletList items={bullets} ordered={isOkrs} />
         </motion.div>
       )}
     </motion.div>

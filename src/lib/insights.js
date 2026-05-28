@@ -1,7 +1,10 @@
 import { llmGenerate } from "./llm";
 import { SYSTEM_PROMPT, buildSegmentPrompt } from "./prompts";
+import { toBulletItems } from "./utils";
 
-const REQUIRED_STRING_KEYS = [
+export { toBulletItems } from "./utils";
+
+const BULLET_FIELD_KEYS = [
   "strengths",
   "weaknesses",
   "opportunities",
@@ -32,6 +35,17 @@ const SIGNAL_KEYS = [
 const clampScore = (val) =>
   Math.min(100, Math.max(0, Math.round(Number(val) || 0)));
 
+function normalizeBulletFields(parsed) {
+  for (const key of BULLET_FIELD_KEYS) {
+    const items = toBulletItems(parsed[key]);
+    if (items.length < 2) {
+      throw new Error(`LLM response missing or invalid field: ${key}`);
+    }
+    parsed[key] = items;
+  }
+  return parsed;
+}
+
 function parseLLMResponse(rawText) {
   let cleaned = rawText.trim();
   if (cleaned.startsWith("```")) {
@@ -52,17 +66,7 @@ function parseLLMResponse(rawText) {
     throw new Error(`Failed to parse LLM JSON response: ${err.message}`);
   }
 
-  if (Array.isArray(parsed.okrs)) {
-    parsed.okrs = parsed.okrs
-      .filter((item) => typeof item === "string" && item.trim().length > 0)
-      .join(" ");
-  }
-
-  for (const key of REQUIRED_STRING_KEYS) {
-    if (typeof parsed[key] !== "string" || parsed[key].length < 10) {
-      throw new Error(`LLM response missing or invalid field: ${key}`);
-    }
-  }
+  normalizeBulletFields(parsed);
 
   if (typeof parsed.confidence !== "number") {
     parsed.confidence = 0.75;

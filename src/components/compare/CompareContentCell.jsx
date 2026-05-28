@@ -1,18 +1,8 @@
-import ReactMarkdown from "react-markdown";
 import { Skeleton } from "../ui/skeleton";
 import { CompareConfidenceRing } from "./CompareConfidenceRing";
+import { InsightBulletList } from "../InsightBulletList";
 import { SEGMENTS } from "../../lib/data";
-import { cn } from "../../lib/utils";
-
-const PROSE =
-  "break-words [overflow-wrap:anywhere] [&_p]:m-0 [&_p+p]:mt-2.5 [&_ul]:m-0 [&_ul]:pl-4 [&_ul]:list-disc [&_ol]:m-0 [&_ol]:pl-4 [&_ol]:list-decimal [&_li]:mt-1 [&_*]:break-words";
-
-function normalizeListItems(value) {
-  if (Array.isArray(value)) {
-    return value.filter((item) => typeof item === "string" && item.trim().length > 0);
-  }
-  return null;
-}
+import { toBulletItems } from "../../lib/utils";
 
 export function CompareContentCell({
   row,
@@ -61,33 +51,10 @@ export function CompareContentCell({
     );
   }
 
-  if (row.renderType === "orderedList") {
-    const items = normalizeListItems(value);
-    if (items && items.length > 0) {
-      return (
-        <ol className="list-decimal pl-4 text-[13px] leading-relaxed text-ink-700 space-y-2 break-words [overflow-wrap:anywhere]">
-          {items.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ol>
-      );
-    }
-    if (typeof value === "string" && value.trim()) {
-      return (
-        <div className={cn("text-[13px] leading-relaxed text-ink-700", PROSE)}>
-          <ReactMarkdown>{value}</ReactMarkdown>
-        </div>
-      );
-    }
-    return <p className="text-[12px] text-ink-400">No insight generated.</p>;
-  }
-
-  if (typeof value === "string" && value.trim()) {
-    return (
-      <div className={cn("text-[13px] leading-relaxed text-ink-700", PROSE)}>
-        <ReactMarkdown>{value}</ReactMarkdown>
-      </div>
-    );
+  if (row.renderType === "orderedList" || row.renderType === "markdown") {
+    const ordered = row.renderType === "orderedList";
+    const items = toBulletItems(value);
+    return <InsightBulletList items={items} ordered={ordered} />;
   }
 
   return <p className="text-[12px] text-ink-400">No insight generated.</p>;
