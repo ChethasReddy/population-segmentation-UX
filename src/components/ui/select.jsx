@@ -17,7 +17,7 @@ export function SelectTrigger({ className, children, ...props }) {
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDown className="h-3.5 w-3.5 text-ink-500 shrink-0 ml-2" />
+        <ChevronDown className="h-3.5 w-3.5 text-ink-500 shrink-0" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )

@@ -1,5 +1,7 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
 import { RADAR_DATA, SEGMENTS } from '../lib/data'
+import { duration, ease, stagger } from '../lib/motion'
 
 const SEG_COLORS = {
   seg1: '#7F77DD',
@@ -17,7 +19,6 @@ const RADAR_AXES = [
   { key: 'convVel',   label: 'Conv. Vel.' },
 ]
 
-// Deterministic bar values — same segment always produces the same scores
 function hashCode(str) {
   let hash = 0
   for (let i = 0; i < str.length; i++) {
@@ -38,6 +39,7 @@ function getBarValues(segmentId) {
 }
 
 export function SegmentProfile({ segmentId }) {
+  const reduceMotion = useReducedMotion()
   const segment = SEGMENTS.find((s) => s.id === segmentId)
   if (!segment) return null
 
@@ -50,55 +52,84 @@ export function SegmentProfile({ segmentId }) {
   const bars = getBarValues(segmentId)
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <motion.div
+      className="grid grid-cols-2 gap-3"
+      variants={reduceMotion ? undefined : stagger.container}
+      initial="initial"
+      animate="animate"
+      key={segmentId}
+    >
       {/* Radar chart */}
-      <div className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3">
+      <motion.div
+        className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3"
+        variants={reduceMotion ? undefined : stagger.item}
+        whileHover={reduceMotion ? undefined : { boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+      >
         <p className="text-[10px] uppercase tracking-wider text-ink-500">Segment Profile</p>
-        <ResponsiveContainer width="100%" height={180}>
-          <RadarChart data={radarData} margin={{ top: 4, right: 20, bottom: 4, left: 20 }}>
-            <PolarGrid stroke="rgba(0,0,0,0.07)" />
-            <PolarAngleAxis
-              dataKey="axis"
-              tick={{ fontSize: 10, fill: '#6B6B73', fontFamily: 'inherit' }}
-            />
-            <Radar
-              dataKey="value"
-              fill={color}
-              fillOpacity={0.25}
-              stroke={color}
-              strokeWidth={1.5}
-              dot={false}
-            />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: duration.slow, ease }}
+        >
+          <ResponsiveContainer width="100%" height={180}>
+            <RadarChart data={radarData} margin={{ top: 4, right: 20, bottom: 4, left: 20 }}>
+              <PolarGrid stroke="rgba(0,0,0,0.07)" />
+              <PolarAngleAxis
+                dataKey="axis"
+                tick={{ fontSize: 10, fill: '#6B6B73', fontFamily: 'inherit' }}
+              />
+              <Radar
+                dataKey="value"
+                fill={color}
+                fillOpacity={0.25}
+                stroke={color}
+                strokeWidth={1.5}
+                dot={false}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        </motion.div>
+      </motion.div>
 
       {/* Opportunity bars */}
-      <div className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3">
+      <motion.div
+        className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3"
+        variants={reduceMotion ? undefined : stagger.item}
+        whileHover={reduceMotion ? undefined : { boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+      >
         <p className="text-[10px] uppercase tracking-wider text-ink-500">Opportunity Signals</p>
         <div className="flex flex-col gap-4 flex-1 justify-center">
-          {bars.map((bar) => {
+          {bars.map((bar, index) => {
             const barColor =
               bar.type === 'threat' ? '#E24B4A'
               : bar.type === 'opportunity' ? '#378ADD'
               : color
             return (
-              <div key={bar.label} className="flex flex-col gap-1.5">
+              <motion.div
+                key={bar.label}
+                className="flex flex-col gap-1.5"
+                initial={reduceMotion ? false : { opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: duration.normal, delay: 0.08 + index * 0.06, ease }}
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-ink-500">{bar.label}</span>
                   <span className="text-[11px] text-ink-400">{bar.value}%</span>
                 </div>
                 <div className="w-full h-1 rounded-full bg-surface-sunken overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{ width: `${bar.value}%`, backgroundColor: barColor }}
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: barColor }}
+                    initial={reduceMotion ? false : { width: 0 }}
+                    animate={{ width: `${bar.value}%` }}
+                    transition={{ duration: 0.7, delay: 0.12 + index * 0.08, ease }}
                   />
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

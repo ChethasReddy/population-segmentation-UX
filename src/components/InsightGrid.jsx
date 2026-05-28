@@ -1,8 +1,10 @@
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { InsightCard } from './InsightCard'
 import { CATEGORIES } from '../lib/data'
+import { duration, ease } from '../lib/motion'
 
 export function InsightGrid({ segmentState, categories }) {
+  const reduceMotion = useReducedMotion()
   const status = segmentState?.status || 'loading'
   const insights = segmentState?.insights || null
   const error = segmentState?.error || null
@@ -25,12 +27,14 @@ export function InsightGrid({ segmentState, categories }) {
         return (
           <motion.div
             key={category.id}
-            initial={{ opacity: 0, y: 8 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              duration: 0.25,
-              delay: status === 'ready' ? index * 0.04 : 0,
+              duration: duration.normal,
+              delay: status === 'ready' && !reduceMotion ? index * 0.04 : 0,
+              ease,
             }}
+            layout
           >
             <InsightCard
               category={category}

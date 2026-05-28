@@ -1,9 +1,10 @@
+import { motion, useReducedMotion } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
 import { Skeleton } from './ui/skeleton'
 import * as LucideIcons from 'lucide-react'
 import { cn } from '../lib/utils'
+import { duration, ease, hoverLift } from '../lib/motion'
 
-// Full class strings so Tailwind's scanner picks them up at build time
 const COLOR_MAP = {
   strengths:     { bg: 'bg-strengths-bg',     fg: 'text-strengths-fg' },
   weaknesses:    { bg: 'bg-weaknesses-bg',     fg: 'text-weaknesses-fg' },
@@ -22,16 +23,25 @@ const PROSE =
 const BODY = 'flex-1 min-h-[105px]'
 
 export function InsightCard({ category, status, value, error }) {
+  const reduceMotion = useReducedMotion()
   const colors = COLOR_MAP[category.color] || { bg: 'bg-surface-sunken', fg: 'text-ink-700' }
   const Icon = LucideIcons[category.icon] || LucideIcons.Zap
 
   return (
-    <div className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3 h-full transition-shadow hover:shadow-sm">
+    <motion.div
+      className="rounded-xl border border-border bg-surface-raised p-4 flex flex-col gap-3 h-full"
+      whileHover={reduceMotion ? undefined : { ...hoverLift, boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}
+      transition={{ duration: duration.fast, ease }}
+    >
       {/* Header */}
       <div className="flex items-center gap-2.5">
-        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${colors.bg}`}>
+        <motion.div
+          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${colors.bg}`}
+          whileHover={reduceMotion ? undefined : { scale: 1.06 }}
+          transition={{ duration: duration.fast, ease }}
+        >
           <Icon className={`w-3.5 h-3.5 ${colors.fg}`} />
-        </div>
+        </motion.div>
         <span className={`text-[10px] uppercase tracking-wider font-medium ${colors.fg}`}>
           {category.label}
         </span>
@@ -49,30 +59,43 @@ export function InsightCard({ category, status, value, error }) {
       )}
 
       {status === 'error' && (
-        <div className={cn('rounded-lg bg-threats-bg px-3 py-2', BODY)}>
+        <motion.div
+          className={cn('rounded-lg bg-threats-bg px-3 py-2', BODY)}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: duration.normal, ease }}
+        >
           <p className="text-[12px] text-threats-fg">{error || 'Failed to load insight.'}</p>
-        </div>
+        </motion.div>
       )}
 
       {status === 'ready' && category.id === 'okrs' && Array.isArray(value) && (
-        <ol
+        <motion.ol
           className={cn(
             'flex flex-col gap-2 pl-4 list-decimal text-[13px] leading-relaxed text-ink-700',
             PROSE,
             BODY
           )}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: duration.normal, ease }}
         >
           {value.map((item, i) => (
             <li key={i}>{item}</li>
           ))}
-        </ol>
+        </motion.ol>
       )}
 
       {status === 'ready' && category.id !== 'okrs' && typeof value === 'string' && (
-        <div className={cn('text-[13px] leading-relaxed text-ink-700', PROSE, BODY)}>
+        <motion.div
+          className={cn('text-[13px] leading-relaxed text-ink-700', PROSE, BODY)}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: duration.normal, ease }}
+        >
           <ReactMarkdown>{value}</ReactMarkdown>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }

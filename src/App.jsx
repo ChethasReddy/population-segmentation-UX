@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { duration, ease, fadeUp } from './lib/motion'
 import { Sidebar } from './components/Sidebar'
 import { TopBar } from './components/TopBar'
 import { SegmentTabs } from './components/SegmentTabs'
@@ -12,6 +13,7 @@ import { useInsights } from './hooks/useInsights'
 import { PRODUCTS, OBJECTIVES, SEGMENTS, CATEGORIES, DEFAULT_STATE } from './lib/data'
 
 export default function App() {
+  const reduceMotion = useReducedMotion()
   const [product, setProduct] = useState(DEFAULT_STATE.product)
   const [objective, setObjective] = useState(DEFAULT_STATE.objective)
   const [activeSegments, setActiveSegments] = useState(DEFAULT_STATE.activeSegments)
@@ -75,7 +77,12 @@ export default function App() {
         onRun={handleRun}
       />
 
-      <div className="flex flex-col flex-1 min-w-0">
+      <motion.div
+        className="flex flex-col flex-1 min-w-0"
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: duration.normal, delay: 0.06, ease }}
+      >
         <TopBar
           product={product}
           objective={objective}
@@ -97,10 +104,10 @@ export default function App() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedSegment}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.18 }}
+                initial={reduceMotion ? false : fadeUp.initial}
+                animate={fadeUp.animate}
+                exit={reduceMotion ? undefined : fadeUp.exit}
+                transition={{ duration: duration.fast, ease }}
                 className="p-6 flex flex-col gap-5"
               >
                 {/* Radar + opportunity bars */}
@@ -124,7 +131,7 @@ export default function App() {
             </AnimatePresence>
           )}
         </main>
-      </div>
+      </motion.div>
     </div>
   )
 }
