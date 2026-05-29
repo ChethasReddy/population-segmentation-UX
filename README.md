@@ -19,7 +19,7 @@ A live population segmentation tool that generates AI-powered strategic insights
 
 ## One tradeoff I made consciously
 
-I shipped SWOT generation as **one structured-JSON call per segment**, not nine separate category prompts. Nine calls per segment would mean up to 36 parallel requests on first load (four segments), with repeated context, higher cost, more rate-limit risk, and more failure points. One call per segment means four parallel requests (concurrency capped at two), lower cost, and a clear wave per segment as each completes—while still feeling responsive with skeleton cards and staggered motion.
+I shipped SWOT generation as **one structured-JSON call per segment**, not nine separate category prompts. Nine calls per segment would mean up to 36 parallel requests on first load (four segments), with repeated context, higher cost, more rate-limit risk, and more failure points. One call per segment means four parallel requests (concurrency capped at two), lower cost, and a clear wave per segment as each completes while still feeling responsive with skeleton cards and staggered motion.
 
 ---
 
