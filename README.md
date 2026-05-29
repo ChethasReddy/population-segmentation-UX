@@ -1,6 +1,6 @@
 # SWOT Prompt Explorer
 
-A live population segmentation tool that generates AI-powered strategic insights across customer segments. Choose a product and business objective, then explore SWOT analysis, marketing OKRs, buyer personas, channel strategy, and an investment case for each segment—with profile charts and side-by-side comparison.
+A live population segmentation tool that generates AI-powered strategic insights across customer segments. Choose a product and business objective, then explore SWOT analysis, marketing OKRs, buyer personas, channel strategy, and an investment case for each segment with profile charts and side-by-side comparison.
 
 **Live:** `https://population-segmentation-ux.vercel.app`
 
@@ -25,11 +25,11 @@ I shipped SWOT generation as **one structured-JSON call per segment**, not nine 
 
 ## What I would build next
 
-1. **Multi-provider routing** — Route persona prose to Claude and structured OKRs/SWOT to a model with native logprob support; OpenAI provider is already scaffolded.
-2. **Logprob-based confidence** — Replace self-reported confidence with token-level scores where the provider supports it (Anthropic does not expose logprobs today).
-3. **Compare auto-fetch** — Generate insights when a segment is added to comparison without cached data (today compare shows cached results only).
-4. **Custom segments** — Free-text input with an archetype derivation call before the main insight run.
-5. **Session history** — Persist and recall past analyses by product and objective (would need a backend or durable local storage).
+1. **Multi-provider routing** - Route persona prose to Claude and structured OKRs/SWOT to a model with native logprob support; OpenAI provider is already scaffolded.
+2. **Logprob-based confidence** - Replace self-reported confidence with token-level scores where the provider supports it (Anthropic does not expose logprobs today).
+3. **Compare auto-fetch** - Generate insights when a segment is added to comparison without cached data (today compare shows cached results only).
+4. **Custom segments** - Free-text input with an archetype derivation call before the main insight run.
+5. **Session history** - Persist and recall past analyses by product and objective (would need a backend or durable local storage).
 
 ---
 
