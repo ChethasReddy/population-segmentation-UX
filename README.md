@@ -11,9 +11,9 @@ A live population segmentation tool that generates AI-powered strategic insights
 - **Segment insights:** One structured LLM call per segment returns all nine categories plus radar and opportunity scores; responses are parsed and validated as JSON before display.
 - **First-load experience:** Default product (Electric Cars) and objective (Increase Awareness) auto-generate insights for all four segments on open. Changing product or objective requires **Generate Insights**.
 - **Session cache:** Results are cached in memory by `product + objective + segment`. Switching back to a previously generated combination restores cached data instantly with no API calls.
-- **Compare mode:** Full-page side-by-side table across segments (all nine insight categories plus a confidence ring per segment). Cells show formatted bullet lists; export copies comparison JSON to clipboard or downloads a file.
+- **Compare mode:** Full page side-by-side table across segments (all nine insight categories plus a confidence ring per segment). Cells show formatted bullet lists; export copies comparison JSON to clipboard or downloads a file.
 - **Segment profile:** Radar chart and opportunity signal bars are derived from LLM output for that segment, not static mock data.
-- **Architecture:** Vercel Edge Function proxy at `/api/generate` so API keys never reach the browser. Provider abstraction with Anthropic as the active provider and OpenAI scaffolded for future logprob-based confidence.
+- **Architecture:** Vercel Edge Function proxy at `/api/generate` so API keys never reach the browser. Provider abstraction with Anthropic as the active provider and OpenAI scaffolded for future logprob based confidence.
 
 ---
 
@@ -28,7 +28,7 @@ I shipped SWOT generation as **one structured-JSON call per segment**, not nine 
 1. **Multi-provider routing** - Route persona prose to Claude and structured OKRs/SWOT to a model with native logprob support; OpenAI provider is already scaffolded.
 2. **Logprob-based confidence** - Replace self-reported confidence with token-level scores where the provider supports it (Anthropic does not expose logprobs today).
 3. **Compare auto-fetch** - Generate insights when a segment is added to comparison without cached data (today compare shows cached results only).
-4. **Custom segments** - Free-text input with an archetype derivation call before the main insight run.
+4. **Custom segments** - Free text input with an archetype derivation call before the main insight run.
 5. **Session history** - Persist and recall past analyses by product and objective (would need a backend or durable local storage).
 
 ---
